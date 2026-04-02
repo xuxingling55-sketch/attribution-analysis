@@ -1,0 +1,31 @@
+# 归因分析工作流 — 连接配置示例
+# 复制此文件为 config.yaml，填写真实信息后使用
+# ⚠️  config.yaml 已加入 .gitignore，不会被提交到 GitHub
+
+database:
+  # SSH 跳板机
+  ssh_host: "YOUR_SSH_HOST"          # 例：221.194.xxx.xxx
+  ssh_user: "YOUR_SSH_USER"          # 例：master
+  ssh_password: "YOUR_SSH_PASSWORD"  # SSH 密码
+
+  # Impala 数据库
+  db_host: "YOUR_DB_HOST"            # 内网 IP，例：10.17.2.45
+  db_port: 10010
+  db_user: "YOUR_DB_USER"
+  db_pass: "YOUR_DB_PASS"
+
+analysis:
+  grade: "九年级"           # 分析的年级，例：九年级 / 八年级
+  anomaly_desc: "上周9年级线索转化率和客单价都跌了"  # 异动描述
+
+  # 近几周时间段定义（int 格式用于活跃宽表 day 字段）
+  weeks_int:
+    - [上周,  20260323, 20260329]
+    - [上上周, 20260316, 20260322]
+    - [3周前,  20260309, 20260315]
+    - [4周前,  20260302, 20260308]
+
+  # 近几周时间段定义（日期字符串用于 paid_time / created_at）
+  weeks_str:
+    - [上周,  "2026-03-23", "2026-03-30"]
+    - [上上周, "2026-03-16", "2026-03-23"]

@@ -1,0 +1,16 @@
+# 包含真实密码，绝对不能提交
+config.yaml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# 报告输出（可选择是否提交）
+reports/*.md
+
+# macOS
+.DS_Store
