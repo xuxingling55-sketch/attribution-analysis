@@ -42,15 +42,32 @@ def run_global_comparison(cursor, target_grade, weeks_str):
     return "GLOBAL_SYNC" # 示例结果
 
 def auto_drill_down(cursor, target_grade, weeks_int):
-    """Q3: 自动化维度穷举扫描"""
+    """Q3: 自动化维度穷举扫描 (流量 + 转化率 + GMV)"""
     dimensions = [
         ('user_layer', 'business_user_pay_status_business'),
         ('source', 'clue_source'),
         ('os', 'client_os'),
         ('city', 'city_level')
     ]
-    print(f"  [Q3] 正在对 {len(dimensions)} 个维度执行自动化下钻扫描...")
-    # ... 遍历维度计算贡献度 ...
+    print(f"  [Q3] 正在对 {len(dimensions)} 个维度执行自动化‘效率+规模’下钻扫描...")
+    
+    # 逻辑：对于每个维度，计算：
+    # 1. 流量占比变化 (Volume Share Change)
+    # 2. 转化率变化 (CVR Change) -> 解决“只拆商品不拆渠道”的问题
+    # 3. GMV 贡献度 (GMV Contribution)
+    
+    for label, col in dimensions:
+        sql = f"""
+        SELECT 
+            {col},
+            COUNT(*) as traffic,
+            SUM(CASE WHEN is_paid=1 THEN 1 ELSE 0 END) as paid_count,
+            SUM(pay_amount) as gmv
+        FROM dws.topic_user_active_detail_day
+        WHERE mid_grade = '{target_grade}' AND day IN ({weeks_int[0][1]}, {weeks_int[1][1]})
+        GROUP BY 1
+        """
+        # ... 逻辑处理：对比两周差异，识别 CVR 剧烈波动的维度 ...
     return dimensions
 
 def verify_hypotheses_v2(cursor, grade, weeks_str):
