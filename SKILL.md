@@ -28,19 +28,19 @@
 
 ---
 
-### Step 2：克隆并运行
+### Step 2：克隆并运行 (优先使用 v2 版本)
 
 ```bash
 git clone https://github.com/xuxingling55-sketch/attribution-analysis.git
 cd attribution-analysis
 pip install -r requirements.txt
 
-python main.py \
+# 使用 v2 版本运行归因分析 (SOP v2)
+python main_v2.py \
   --ssh-host <SSH_IP> \
   --ssh-user <SSH_USER> \
   --ssh-pass <SSH_PASS> \
   --db-host <DB_HOST> \
-  --db-port 10010 \
   --db-user <DB_USER> \
   --db-pass <DB_PASS> \
   --grade "<年级>" \
@@ -51,6 +51,8 @@ python main.py \
     "3周前,20260309,20260315,2026-03-09,2026-03-16" \
     "4周前,20260302,20260308,2026-03-02,2026-03-09"
 ```
+
+> **v2 新增功能**：自动执行真伪判定、全局对标、全维度自动下钻。若需运行基础版请使用 `main.py`。
 
 `--weeks` 每条格式：`标签,int开始,int结束,str开始,str结束`
 
