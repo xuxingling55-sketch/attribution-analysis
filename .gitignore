@@ -1,16 +1,27 @@
-# 包含真实密码，绝对不能提交
-config.yaml
 
 # Python
-__pycache__/
+# macOS
+# 例如：
+# 包含真实密码，绝对不能提交
+# 如果你使用编辑器，还可以添加一些常见编辑器临时文件
+# 忽略 Cursor/SpecStory 等编辑器配置文件
+# 忽略 macOS 系统文件
+# 报告输出（可选择是否提交）
 *.pyc
 *.pyo
-.env
-venv/
-.venv/
-
-# 报告输出（可选择是否提交）
-reports/*.md
-
-# macOS
+*.swp
+*~
 .DS_Store
+.Spotlight-V100
+.Trashes
+._*
+.cursorindexingignore
+.env
+.idea/
+.specstory/
+.venv/
+.vscode/
+__pycache__/
+config.yaml
+reports/*.md
+venv/

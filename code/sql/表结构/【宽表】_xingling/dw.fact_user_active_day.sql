@@ -1,0 +1,94 @@
+-- =====================================================
+-- 用户活跃日事实表 dw.fact_user_active_day
+-- =====================================================
+--
+-- 【表粒度】
+--   用户 × 活跃日一条（分区 day int；明细级活跃）
+--
+-- 【业务定位】
+--   - 明细活跃、行政班 is_admin_room 等；与汇总宽表 topic_user_active_detail_day 粒度不同
+--
+-- 【统计口径】
+--   COUNT(DISTINCT u_user) 等按需求
+--
+-- 【常用筛选条件】
+--   场景条件：
+--   - is_test_user、is_admin_room 等按场景
+--
+-- 【注意事项】
+--   - 更新频率 T+1
+
+CREATE EXTERNAL TABLE `dw`.`fact_user_active_day` (
+  `role` string COMMENT '角色',
+  `u_user` string COMMENT '用户id',
+  `os` string COMMENT '用户活跃的os',
+  `device` string COMMENT '设备号',
+  `model` string COMMENT '设备类型',
+  `d_app_version` string COMMENT '用户使用的App版本号',
+  `date_id` string COMMENT '活跃日期',
+  `platform` string COMMENT '用户活跃于app还是pc',
+  `teaching_type` string COMMENT '教学类型',
+  `user_sk` int COMMENT '用户id',
+  `date_sk` int COMMENT '活跃日期',
+  `product_id` string COMMENT '产品ID',
+  `u_channel` string COMMENT '下载渠道',
+  `d_os_version` string COMMENT '操作系统版本号',
+  `net_config` string COMMENT '用户网络类型',
+  `d_model_brand` string COMMENT '用户手机品牌',
+  `d_model_name` string COMMENT '用户手机型号',
+  `active_hour_arr` array < smallint > COMMENT '活跃的小时点',
+  `active_time` timestamp COMMENT '活跃的时间戳',
+  `grade` string COMMENT '用户填写年级',
+  `mid_grade` string COMMENT '中学修正年级',
+  `mid_stage_name` string COMMENT '中学修正学段',
+  `gender` string COMMENT '用户性别',
+  `regist_time` timestamp COMMENT '注册时间',
+  `regist_time_sk` int COMMENT '注册时间sk',
+  `channel` string COMMENT '注册渠道',
+  `u_from` string COMMENT '系统平台',
+  `type` string COMMENT '注册方式(枚举值)',
+  `is_put_channel` smallint COMMENT '是否投放渠道',
+  `province` string COMMENT '省',
+  `province_code` string COMMENT '省code',
+  `city` string COMMENT '市',
+  `city_code` string COMMENT '市code',
+  `area` string COMMENT '区',
+  `area_code` string COMMENT '区code',
+  `is_test_user` smallint COMMENT '是否测试用户',
+  `is_teach_user` smallint COMMENT '是否教学班用户',
+  `is_admin_room` smallint COMMENT '是否行政班用户',
+  `is_room_user` smallint COMMENT '是否有班用户',
+  `is_new_user` smallint COMMENT '是否新用户',
+  `school_sk` int COMMENT '学校sk',
+  `school_id` string COMMENT '学校id',
+  `school_id1` string COMMENT '学校id1',
+  `school_sk1` int COMMENT '学校sk1',
+  `user_attribution` string COMMENT '用户活跃时归属',
+  `regist_user_attribution` string COMMENT '用户注册当天归属',
+  `room_id` string COMMENT '用户行政班id',
+  `agent_id` string COMMENT '用户所在学校的代理商id',
+  `ss_arr` array < string > COMMENT 'vip的学段学科数组',
+  `is_vip_user` smallint COMMENT '是否是vip用户',
+  `device_sk` bigint COMMENT '设备代理建',
+  `study_book_info` string COMMENT '学生当前的教学版本和学期信息',
+  `study_book_info_array` array < string > COMMENT '学生当前的教学版本和学期信息(数组)',
+  `is_pad_device` smallint COMMENT '是否是pad设备',
+  `sn_code` string COMMENT 'sn_code',
+  `device_type` string COMMENT '设备类型',
+  `user_allocation` array < string > COMMENT '用户全域服务期',
+  `user_vip_tag` string COMMENT '会员身份标签',
+  `user_identity` string COMMENT '用户身份：研究员：common，高级研究员：advanced，首席研究员：lead，体验版首席研究员：expLead'
+) COMMENT 'null' PARTITIONED BY (`day` int) ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.orc.OrcSerde' STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat' LOCATION 'tos://yc-data-platform/user/hive/warehouse/dw.db/fact_user_active_day'
+
+-- =====================================================
+-- 枚举值
+-- =====================================================
+--
+-- （待补充：按 `knowledge/SPEC.md` 与 `表结构模版.md`，将关键字段枚举从线上 COMMENT 或 `knowledge_old/enums.md` 整理至下表；布尔/二值字段仅在字段 COMMENT 说明，可不列本段。）
+--
+-- ## 示例字段名（字段说明）
+--
+-- | 枚举值 | 含义 |
+-- |--------|------|
+-- | （待补充） | （待补充） |
+--

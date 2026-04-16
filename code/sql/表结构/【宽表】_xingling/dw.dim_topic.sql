@@ -1,0 +1,95 @@
+-- {知识点维表} {dw}.{dim_topic}
+-- =====================================================
+--
+-- 【表粒度】
+--  一个知识点=一条记录（topic_sk 唯一标识）
+--  存储知识点对应的具体章节、科目、学期类知识点维度相关信息
+
+--【常用关联】
+-- 查看具体科目（如：数学等）和学期（如：七年级上）数据
+-- 本表.topic_sk=dw.fact_user_watch_video_day.topic_sk
+
+-- 【注意事项】
+--  与dw.fact_user_watch_video_day此表关联时，dw.fact_user_watch_video_day中的topic_sk非唯一值，会出现多条的情况
+
+--
+-- =====================================================
+
+CREATE EXTERNAL TABLE `dw`.`dim_topic` (
+  `topic_sk` int COMMENT '知识点代理键',
+  `video_sk` int COMMENT '视频id代理键',
+  `name` string COMMENT '知识点名',
+  `pay` boolean COMMENT '是否付费知识点',
+  `type` string COMMENT '知识点类型',
+  `type_name` string COMMENT '知识点类型名',
+  `state` string COMMENT '是否上线',
+  `key_point` boolean COMMENT '是否是关键点',
+  `pain_point` string COMMENT '是否是痛点',
+  `description` string COMMENT '描述',
+  `is_free_time` boolean COMMENT '是否限免',
+  `chapter_sk` int COMMENT '章节代理键',
+  `chapter_name` string COMMENT '章节名',
+  `section_sk` int COMMENT '节代理键',
+  `section_name` string COMMENT '节名',
+  `subsection_sk` int COMMENT '小节代理键',
+  `subsection_name` string COMMENT '小节名',
+  `theme_sk` int COMMENT '主题代理键',
+  `theme_name` string COMMENT '主题名',
+  `theme_type` string COMMENT '主题类型',
+  `stage_id` int COMMENT '学段ID',
+  `stage_name` string COMMENT '学段名',
+  `subject_id` int COMMENT '科目id',
+  `subject_name` string COMMENT '科目名',
+  `publisher_id` int COMMENT '教材ID',
+  `publisher_name` string COMMENT '教材名',
+  `semester_id` int COMMENT '学期ID',
+  `semester_name` string COMMENT '学期名',
+  `create_time` timestamp COMMENT '源系统创建条目的时间',
+  `update_time` timestamp COMMENT '源系统修改条目的时间',
+  `dw_insert_time` timestamp COMMENT 'ETL插入记录的时间',
+  `dw_update_time` timestamp COMMENT 'ETL修改记录的时间',
+  `topic_source` smallint COMMENT '1：系统课知识点  2：专项课知识点',
+  `topic_id` string COMMENT '知识点ID',
+  `video_id` string COMMENT '视频id',
+  `chapter_id` string COMMENT '章节id',
+  `section_id` string COMMENT '大节id',
+  `subsection_id` string COMMENT '小节id',
+  `theme_id` string COMMENT '主题id',
+  `tags` array < string > COMMENT 'tag信息',
+  `lose_rate` smallint COMMENT '丢分率(字段下线)',
+  `chapter_point_id` string COMMENT '考点id(字段下线)',
+  `chapter_point_name` string COMMENT '考点名称(字段下线)',
+  `chapter_point_state` string COMMENT '考点发布状态(字段下线)',
+  `chapter_point_type` string COMMENT '考点分类(字段下线)',
+  `chapter_point_key_word` string COMMENT '考点关键词(字段下线)',
+  `chapter_point_example` string COMMENT '考点涉及例题(字段下线)',
+  `chapter_point_formula` string COMMENT '考点涉及公式(字段下线)',
+  `chapter_point_number` smallint COMMENT '考点排序值(字段下线)',
+  `chapter_order` smallint COMMENT '5级结构章节',
+  `section_order` smallint COMMENT '5级结构大节',
+  `subsection_order` smallint COMMENT '5级结构小节',
+  `theme_order` smallint COMMENT '5级结构主题',
+  `topic_order` smallint COMMENT '5级结构知识点',
+  `course_type` string COMMENT '课程类型',
+  `is_practice_problem` int COMMENT '是否有练习题',
+  `changed_practice_problem_day` string COMMENT '有练习题的时间-日期',
+  `is_group_practice_problem` int COMMENT '是否有变式题的练习题',
+  `changed_group_practice_problem_day` string COMMENT '有变式题练习题的时间-天',
+  `topic_type` string COMMENT '知识点类型'
+) COMMENT '一个知识点一条记录' ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.orc.OrcSerde' STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat' LOCATION 'tos://yc-data-platform/user/hive/warehouse/dw.db/dim_topic' TBLPROPERTIES (
+  'alias' = '知识点维表',
+  'bucketing_version' = '2',
+  'last_modified_by' = 'liuguanxiong',
+  'last_modified_time' = '1727248604',
+  'spark.sql.create.version' = '2.3.0.2.6.5.0-292',
+  'spark.sql.sources.schema.numParts' = '2',
+  'spark.sql.sources.schema.part.0' = '{"type":"struct","fields":[{"name":"topic_sk","type":"integer","nullable":true,"metadata":{"comment":"知识点代理键"}},{"name":"video_sk","type":"integer","nullable":true,"metadata":{"comment":"视频id代理键"}},{"name":"name","type":"string","nullable":true,"metadata":{"comment":"知识点名"}},{"name":"pay","type":"boolean","nullable":true,"metadata":{"comment":"是否付费知识点"}},{"name":"type","type":"string","nullable":true,"metadata":{"comment":"知识点类型"}},{"name":"type_name","type":"string","nullable":true,"metadata":{"comment":"知识点类型名"}},{"name":"state","type":"string","nullable":true,"metadata":{"comment":"是否上线"}},{"name":"key_point","type":"boolean","nullable":true,"metadata":{"comment":"是否是关键点"}},{"name":"pain_point","type":"string","nullable":true,"metadata":{"comment":"是否是痛点"}},{"name":"description","type":"string","nullable":true,"metadata":{"comment":"描述"}},{"name":"is_free_time","type":"boolean","nullable":true,"metadata":{"comment":"是否限免"}},{"name":"chapter_sk","type":"integer","nullable":true,"metadata":{"comment":"章节代理键"}},{"name":"chapter_name","type":"string","nullable":true,"metadata":{"comment":"章节名"}},{"name":"section_sk","type":"integer","nullable":true,"metadata":{"comment":"节代理键"}},{"name":"section_name","type":"string","nullable":true,"metadata":{"comment":"节名"}},{"name":"subsection_sk","type":"integer","nullable":true,"metadata":{"comment":"小节代理键"}},{"name":"subsection_name","type":"string","nullable":true,"metadata":{"comment":"小节名"}},{"name":"theme_sk","type":"integer","nullable":true,"metadata":{"comment":"主题代理键"}},{"name":"theme_name","type":"string","nullable":true,"metadata":{"comment":"主题名"}},{"name":"theme_type","type":"string","nullable":true,"metadata":{"comment":"主题类型"}},{"name":"stage_id","type":"integer","nullable":true,"metadata":{"comment":"学段ID"}},{"name":"stage_name","type":"string","nullable":true,"metadata":{"comment":"学段名"}},{"name":"subject_id","type":"integer","nullable":true,"metadata":{"comment":"科目id"}},{"name":"subject_name","type":"string","nullable":true,"metadata":{"comment":"科目名"}},{"name":"publisher_id","type":"integer","nullable":true,"metadata":{"comment":"教材ID"}},{"name":"publisher_name","type":"string","nullable":true,"metadata":{"comment":"教材名"}},{"name":"semester_id","type":"integer","nullable":true,"metadata":{"comment":"学期ID"}},{"name":"semester_name","type":"string","nullable":true,"metadata":{"comment":"学期名"}},{"name":"create_time","type":"timestamp","nullable":true,"metadata":{"comment":"源系统创建条目的时间"}},{"name":"update_time","type":"timestamp","nullable":true,"metadata":{"comment":"源系统修改条目的时间"}},{"name":"dw_insert_time","type":"timestamp","nullable":true,"metadata":{"comment":"ETL插入记录的时间"}},{"name":"dw_update_time","type":"timestamp","nullable":true,"metadata":{"comment":"ETL修改记录的时间"}},{"name":"topic_source","type":"short","nullable":true,"metadata":{"comment":"1：系统课知识点  2：专项课知识点"}},{"name":"topic_id","type":"string","nullable":true,"metadata":{"comment":"知识点ID"}},{"name":"video_id","type":"string","nullable":true,"metadata":{"comment":"视频id"}},{"name":"chapter_id","type":"string","nullable":true,"metadata":{"comment":"章节id"}},{"name":"section_id","type":"string","nullable":true,"metadata":{"comment":"大节id"}},{"name":"subsection_id","type":"string","nullable":true,"metadata":{"comment":"小节id"}},{"name":"theme_id","type":"string","nullable":true,"metadata":{"comment":"主题id"}},{"name":"tags","type":{"type":"array","elementType":"string","containsNull":true},"nullable":true,"metadata":{"comment":"tag信息"}},{"name":"lose_rate","type":"short","nullable":true,"metadata":{"comment":"丢分率(字段下线)"}},{"name":"chapter_point_id","type":"string","nullable":true,"metadata":{"comment":"考点id(字段下线)"}},{"name":"chapter_point_name","type":"string","nullable":true,"metadata":{"comment":"考点名称(字段下线)"}},{"name":"chapter_point_state","type":"string","nullable":true,"metadata":{"comment":"考点发布状态(字段下线)"}},{"name":"chapter_point_type","type":"string","nullable":true,"metadata":{"comment":"考点分类(字段下线)"}},{"name":"chapter_point_key_word","type":"string","nullable":true,"metadata":{"comment":"考点关键词(字段下线)"}},{"name":"chapter_point_example","type":"string","nullable":true,"metadata":{"comment":"考点涉及例题(字段下线)"}},{"name":"chapter_point_formula","type":"string","nullable":true,"metadata":{"comment":"考点涉及公式(字段下线)"}},{"name":"chapter_point_number","type":"short","nullable":true,"metadata":{"comment":"考点排序值(字段下线)"}},{"name":"chapter_order","type":"short","nullable":true,"metadata":{"comment":"5级结构章节"}},{"name":"section_order","type":"short","nullable":true,"metadata":{"comment":"5级结构大节"}},{"name":"subsection_order","type":"short","nullable":true,"metadata":{"comment":"5级结构小节"}},{"name":"theme_order","type":"short","nullable":true,"metadata":{"comment":"5级结构主题"}},{"name":"topic_order","type":"short","nullable":true,"metadata":{"comment":"5级结构知识点"}},{"name":"course_type","type":"string","nullable":true,"metadata":{"comment":"课程类型"}},{"name":"is_practice_problem","type":"integer","nullable":true,"metadata":{"comment":"是否有练习题"}},{"name":"changed_practice_problem_day","type":"string","nullable":true,"metadata":{"comment":"有练习题的时间-日期"}},{"name":"is_group_practice_problem","type":"integer","nullable":true,"metadata":{"comment":"是否有变式题的练习题"}},{"name":"changed_group_practice_problem_day","type":"string","nullable":true,"metadata":{"comment":"有变式题练习题的时间-天"}},{"name":"topic_type","type":"string","nullable":true,"metadata":{"comment":"知识点类型"}}]}',
+  'spark.sql.sources.schema.part.1' = '_point_key_word","type":"string","nullable":true,"metadata":{"comment":"考点关键词(字段下线)"}},{"name":"chapter_point_example","type":"string","nullable":true,"metadata":{"comment":"考点涉及例题(字段下线)"}},{"name":"chapter_point_formula","type":"string","nullable":true,"metadata":{"comment":"考点涉及公式(字段下线)"}},{"name":"chapter_point_number","type":"short","nullable":true,"metadata":{"comment":"考点排序值(字段下线)"}},{"name":"chapter_order","type":"short","nullable":true,"metadata":{"comment":"5级结构章节"}},{"name":"section_order","type":"short","nullable":true,"metadata":{"comment":"5级结构大节"}},{"name":"subsection_order","type":"short","nullable":true,"metadata":{"comment":"5级结构小节"}},{"name":"theme_order","type":"short","nullable":true,"metadata":{"comment":"5级结构主题"}},{"name":"topic_order","type":"short","nullable":true,"metadata":{"comment":"5级结构知识点"}},{"name":"course_type","type":"string","nullable":true,"metadata":{"comment":"课程类型"}},{"name":"is_practice_problem","type":"integer","nullable":true,"metadata":{"comment":"是否有练习题"}},{"name":"changed_practice_problem_day","type":"string","nullable":true,"metadata":{"comment":"有练习题的时间-日期"}},{"name":"is_group_practice_problem","type":"integer","nullable":true,"metadata":{"comment":"是否有变式题的练习题"}},{"name":"changed_group_practice_problem_day","type":"string","nullable":true,"metadata":{"comment":"有变式题练习题的时间-天"}},{"name":"topic_type","type":"string","nullable":true,"metadata":{"comment":"知识点类型"}}]}',
+  'transient_lastDdlTime' = '1774370849'
+)
+
+
+-- =====================================================
+-- 枚举值
+-- =====================================================
+-- 无

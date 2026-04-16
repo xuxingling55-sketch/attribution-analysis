@@ -1,0 +1,75 @@
+=====================================================
+--第一段、表头注释
+-- {兑换码表} {dw}.{fact_user_redeem_code}
+-- =====================================================
+--
+-- 【表粒度】★必填
+--  同一个用户（user_id）可以领取不同的兑换码，user_id有重复的情况
+--
+-- 【统计口径】
+--   领取兑换码用户数 = COUNT(distinct user_id)
+--
+-- 【常用关联】
+--  用户服务期开始时间、结算时间、全域用户归属
+--  -本表.user_id=dw.dim_user.u_user
+--  -本表.user_id=user_allocation.user_allocation.user_id
+--  -本表.user_id=dw.dim_user_his.u_user
+--  -本表.user_id=dws.topic_order_detail.u_user
+--
+-- 【常用筛选条件】
+--   ★必加条件：
+--   - redeem_time  --限制时间区间，格式yyyy-mm-dd
+
+
+-- 【注意事项】
+--   ⚠️ 取新媒体数据时候application_departments='新媒体团队'
+--   - 给到特殊兑换码请从application_usage这个里边调取
+
+
+=====================================================
+--第二段：DDL 建表语句
+CREATE TABLE
+  `dw`.`fact_user_redeem_code` (
+    `content_kind` string COMMENT '兑换码兑换内容种类',
+    `content_name` string COMMENT '兑换码兑换内容名称',
+    `content_rule` string COMMENT '兑换码兑换内容类型',
+    `content_course_type` string COMMENT '课程类型',
+    `content_stageid` array < string > COMMENT '学段id集合',
+    `content_publisherid` array < string > COMMENT '教材版本集合',
+    `content_subjectid` array < string > COMMENT '学科id集合',
+    `content_semesterid` array < string > COMMENT '学期id集合',
+    `content_rangedescription` string COMMENT '内容描述',
+    `content_trialtime` string COMMENT '兑换码内容试验时间',
+    `content_expired_time` timestamp COMMENT '兑换码内容试验时间',
+    `content_kinds` string COMMENT '兑换码类型',
+    `redeem_expired_time` timestamp COMMENT '兑换码使用过期时间',
+    `content_purpose` string COMMENT '出售方式',
+    `content_price` int COMMENT '价格',
+    `id` string COMMENT 'ID',
+    `batch_id` string COMMENT '批次id',
+    `expire_time` timestamp COMMENT '过期时间',
+    `status` string COMMENT '兑换码状态',
+    `code` string COMMENT '兑换码',
+    `code_id` string COMMENT '卡号',
+    `updated_at` timestamp COMMENT '更新时间',
+    `created_at` timestamp COMMENT '创建时间',
+    `user_id` string COMMENT '消费该兑换码的用户',
+    `redeem_time` timestamp COMMENT '兑换码兑换时间',
+    `user_sk` int COMMENT '消费该兑换码的用户sk',
+    `application_departments` string COMMENT '申请业务组',
+    `application_usage` string COMMENT '申请用途',
+    `application_remake` string COMMENT '申请备注'
+  ) COMMENT 'null' ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.orc.OrcSerde' STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat' LOCATION 'tos://yc-data-platform/user/hive/warehouse/dw.db/fact_user_redeem_code' TBLPROPERTIES (
+    'alias' = '兑换码表',
+    'bucketing_version' = '2',
+    'is_core' = 'true',
+    'last_modified_by' = 'liuguanxiong',
+    'last_modified_time' = '1727322423',
+    'spark.sql.create.version' = '2.2 or prior',
+    'spark.sql.sources.schema' = '{"type":"struct","fields":[{"name":"content_kind","type":"string","nullable":true,"metadata":{"comment":"兑换码兑换内容种类"}},{"name":"content_name","type":"string","nullable":true,"metadata":{"comment":"兑换码兑换内容名称"}},{"name":"content_rule","type":"string","nullable":true,"metadata":{"comment":"兑换码兑换内容类型"}},{"name":"content_course_type","type":"string","nullable":true,"metadata":{"comment":"课程类型"}},{"name":"content_stageid","type":{"type":"array","elementType":"string","containsNull":true},"nullable":true,"metadata":{"comment":"学段id集合"}},{"name":"content_publisherid","type":{"type":"array","elementType":"string","containsNull":true},"nullable":true,"metadata":{"comment":"教材版本集合"}},{"name":"content_subjectid","type":{"type":"array","elementType":"string","containsNull":true},"nullable":true,"metadata":{"comment":"学科id集合"}},{"name":"content_semesterid","type":{"type":"array","elementType":"string","containsNull":true},"nullable":true,"metadata":{"comment":"学期id集合"}},{"name":"content_rangedescription","type":"string","nullable":true,"metadata":{"comment":"内容描述"}},{"name":"content_trialtime","type":"string","nullable":true,"metadata":{"comment":"兑换码内容试验时间"}},{"name":"content_expired_time","type":"timestamp","nullable":true,"metadata":{"comment":"兑换码内容试验时间"}},{"name":"content_kinds","type":"string","nullable":true,"metadata":{"comment":"兑换码类型"}},{"name":"redeem_expired_time","type":"timestamp","nullable":true,"metadata":{"comment":"兑换码使用过期时间"}},{"name":"content_purpose","type":"string","nullable":true,"metadata":{"comment":"出售方式"}},{"name":"content_price","type":"integer","nullable":true,"metadata":{"comment":"价格"}},{"name":"id","type":"string","nullable":true,"metadata":{"comment":"ID"}},{"name":"batch_id","type":"string","nullable":true,"metadata":{"comment":"批次id"}},{"name":"expire_time","type":"timestamp","nullable":true,"metadata":{"comment":"过期时间"}},{"name":"status","type":"string","nullable":true,"metadata":{"comment":"兑换码状态"}},{"name":"code","type":"string","nullable":true,"metadata":{"comment":"兑换码"}},{"name":"code_id","type":"string","nullable":true,"metadata":{"comment":"卡号"}},{"name":"updated_at","type":"timestamp","nullable":true,"metadata":{"comment":"更新时间"}},{"name":"created_at","type":"timestamp","nullable":true,"metadata":{"comment":"创建时间"}},{"name":"user_id","type":"string","nullable":true,"metadata":{"comment":"消费该兑换码的用户"}},{"name":"redeem_time","type":"timestamp","nullable":true,"metadata":{"comment":"兑换码兑换时间"}},{"name":"user_sk","type":"integer","nullable":true,"metadata":{"comment":"消费该兑换码的用户sk"}},{"name":"application_departments","type":"string","nullable":true,"metadata":{"comment":"申请业务组"}},{"name":"application_usage","type":"string","nullable":true,"metadata":{"comment":"申请用途"}},{"name":"application_remake","type":"string","nullable":true,"metadata":{"comment":"申请备注"}}]}',
+    'transient_lastDdlTime' = '1775667498'
+  )
+
+=====================================================
+--第三段、枚举值
+--暂时没有用到

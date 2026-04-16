@@ -1,0 +1,85 @@
+-- =====================================================
+-- 线索来源名称维表 tmp.wuhan_clue_soure_name
+-- =====================================================
+--
+-- 【表粒度】★必填
+--   一个线索来源编码 = 一行记录（clue_source 唯一）
+--   行内给出该编码的中文名称及一级分类
+--
+-- 【业务定位】
+--   线索来源编码 → 中文名称的映射小维表。
+--   aws.clue_info.clue_source 存英文/编码类取值，需 JOIN 本表得到中文展示名。
+-- 【常用关联】
+--   线索来源名称：
+--     本表.clue_source = aws.clue_info.clue_source（获取 clue_source_name、clue_source_name_level_1）
+-- 【注意事项】
+--   ⚠️ clue_source_name、clue_source_name_level_1 不是 aws.clue_info 的物理字段，
+--      不可从线索表直接 SELECT，须 JOIN 本表获取。
+--
+-- =====================================================
+
+CREATE TABLE `tmp`.`wuhan_clue_soure_name` (
+  `clue_source`              string COMMENT '线索来源编码（关联 aws.clue_info.clue_source）',
+  `clue_source_name`         string COMMENT '线索来源名称（中文展示名）',
+  `clue_source_name_level_1` string COMMENT '线索来源一级分类'
+);
+
+-- =====================================================
+-- 枚举值
+-- =====================================================
+--
+-- ## clue_source → clue_source_name 映射
+-- > 完整枚举参见 aws.clue_info DDL（电销线索领取记录表.sql）
+-- | clue_source | clue_source_name |
+-- |-------------|-----------------|
+-- | manual | 人工录入 |
+-- | mid_school_manual | 中学业务-人工 |
+-- | mid_school | 中学业务 |
+-- | custom_service_manual | 客服推送 |
+-- | transfer | 普通转移 |
+-- | departure | 离职转移 |
+-- | primary_lab | 小学轻课实验组 |
+-- | WeCom | 企业微信 |
+-- | social_media | 新媒体 |
+-- | referral | 转介绍 |
+-- | tiyanying | 体验营 |
+-- | telesale_mp | 电销小程序 |
+-- | server_number | 洋葱服务号 |
+-- | parent | 家长端小程序 |
+-- | tiyan_upgrade | 体验升级策略 |
+-- | live | 视频号 |
+-- | research | 游学商品 |
+-- | luosi | 螺蛳教育 |
+-- | aladdin | 阿拉丁 |
+-- | aladdin_manual | 阿拉丁-人工录入 |
+-- | aladdin_referral | 阿拉丁-转介绍 |
+-- | aladdin_retry | 阿拉丁重试 |
+-- | repeated_exposure | 活码重复曝光 |
+-- | purchase | 订单成交 |
+-- | deal_transfer | 成交转移 |
+-- | phone_binding | 手机号换绑 |
+-- | mid_school_auto_transfer | 电话线索自动转移 |
+-- | referral_auto_transfer | 转介绍相关自动转移 |
+-- | building_blocks_goods_midschool | 千元品测试-中学业务 |
+-- | building_blocks_goods_manual | 千元品测试-定向分配 |
+-- | building_blocks_goods_wecom | 千元品测试-企业微信 |
+-- | family_other | 家庭其他线索 |
+-- | family_merge | 家庭合并 |
+-- | family_auto_transfer | 家庭自动流转 |
+-- | self_service_pool | 自助线索池 |
+-- | media998 | 新媒体998 |
+-- | jingyan_198 | 线索品-双倍抵扣 |
+-- | exp_camp_paid | 体验营付费 |
+--
+-- ## clue_source_name_level_1（线索来源一级分类）
+--
+-- | 枚举值 | 含义 |
+-- |--------|------|
+-- | 中学业务 | |
+-- | 中学业务-人工 | |
+-- | 企业微信 | |
+-- | 人工录入 | |
+-- | 转介绍 | |
+-- | 自助线索池 | |
+-- | 其他 | |
+

@@ -1,0 +1,101 @@
+=====================================================
+--第一段、表头注释
+-- {C端活跃用户端口汇总日表} {aws}.{mid_active_user_os_day}
+-- =====================================================
+--
+-- 【表粒度】★必填
+--  一个用户一个端口=一条记录（user_sk+client_os+day 唯一标识）
+--  用户会有重复的情况
+--
+-- 【统计口径】
+-- 使用学习机用户数（别名学习机活跃数）=count（distinct case when is_use_ycpad='1' then u_user end）
+--
+--【常用筛选条件】
+--   ★必加条件（任何查询都必须带）：
+--   day between 开始时间 and  结束时间     --分区表，需要选时间区间，格式yyyymmdd
+
+
+=====================================================
+--第二段：DDL 建表语句
+CREATE EXTERNAL TABLE `aws`.`mid_active_user_os_day` (
+  `user_sk` int,
+  `mid_stage_name` string COMMENT '中学定义学段:初中、高中、null、其他',
+  `active_type` string COMMENT '(中学)活跃类型：1新增 2 持续 3回流',
+  `client_os` string COMMENT '端口',
+  `active_user` string COMMENT '访问活跃用户sk',
+  `learn_active_user` string COMMENT '学习活跃用户sk',
+  `learn_active_user_topic_finish_cnt` int COMMENT '学习活跃用户知识点完成次数（学习活跃次数)',
+  `video_active_user` string COMMENT '(课程)视频活跃用户sk',
+  `watch_video_cnt` int COMMENT '(课程)视频开始次数',
+  `serious_watch_video_user` string COMMENT '(视频活跃用户)认真观看用户',
+  `serious_watch_video_cnt` int COMMENT '视频认真观看次数',
+  `finish_watch_user` string COMMENT '(视频活跃用户)视频完播用户sk',
+  `finish_watch_video_cnt` int COMMENT '视频完播次数',
+  `exercise_active_user` string COMMENT '专项练习活跃用户sk',
+  `exercise_cnt` int COMMENT '专项练习次数',
+  `day_timestamp` timestamp COMMENT '日期时间戳',
+  `mid_revenue_max_amount` double COMMENT '统计周期内购买过的中学营收最大订单实付金额',
+  `mid_revenue_max_original_amount` double COMMENT '统计周期内购买过的最大订单原价金额',
+  `exercise_course_package_problem_cnt` int COMMENT '专项做题次数（专项练习+专项课程包做题次数）',
+  `non_exercise_problem_cnt` int COMMENT '非专项练习做题次数（剔除专项练习做题题目，专项课程包）',
+  `non_exercise_cnt` int COMMENT '非专项练习次数',
+  `non_exercise_finish_cnt` int COMMENT '非专项练习完成次数',
+  `total_exercise_cnt` int COMMENT '所有模块练习次数',
+  `total_exercise_finish_cnt` int COMMENT '所有模块练习完成次数',
+  `total_problem_cnt` int COMMENT '所有模块练习做题次数',
+  `exercise_home_page_cnt` int COMMENT '进入做题入口页次数',
+  `exercise_first_page_cnt` int COMMENT '进入做题模块首页次数',
+  `exercise_detail_page_cnt` int COMMENT '进入试题页次数',
+  `exercise_submit_answer_page_cnt` int COMMENT '进入答题提交答案页次数',
+  `exercise_finsh_page_cnt` int COMMENT '进入答题完成页次数',
+  `app_first_page_cnt` int COMMENT '进入app首页次数',
+  `chapter_list_page_cnt` int COMMENT '进入章节列表页次数',
+  `section_detail_page_cnt` int COMMENT '进入小节详情页次数',
+  `is_teach_user` int COMMENT '是否在教学班',
+  `u_user` string COMMENT '用户ID',
+  `course_video_page_cnt` int COMMENT '进入课程视频页面次数（漏斗侧)',
+  `section_detail_exposure_page_cnt` int COMMENT '进入小节详情页（曝光节点）次数',
+  `regist_time_sk` int COMMENT '注册时间sk',
+  `grade` string COMMENT '用户填写年级，20190409之前走修正',
+  `d_app_version` string COMMENT '用户在活跃端口最后一次活跃版本',
+  `non_exercise_problem_user` string COMMENT '非专项练习做题用户',
+  `is_vip_user` smallint COMMENT '是否是vip用户',
+  `ss_arr` array < string > COMMENT 'vip的学段学科数组',
+  `watch_course_video_duration` int COMMENT '观看课程视频时长',
+  `use_duration_m` int COMMENT '统计周期内使用app时长(单位：分钟)',
+  `finish_exercise_cnt` int COMMENT '完成专项练习次数',
+  `open_exercise_synchronous_training_cnt` int COMMENT '开始同步练练习次数',
+  `finish_exercise_synchronous_training_cnt` int COMMENT '完成同步练练习次数',
+  `open_exercise_pk_cnt` int COMMENT '开始pk练习次数',
+  `finish_exercise_pk_cnt` int COMMENT '完成pk练习次数',
+  `open_exercise_challenge_question_cnt` int COMMENT '开始挑战学霸练习次数',
+  `finish_exercise_challenge_question_cnt` int COMMENT '完成挑战学霸练习次数',
+  `user_pay_status_statistics` string COMMENT '统计维度：保持新增、老未、付费的标签',
+  `user_pay_status_business` string COMMENT '策略维度：新用户、老用户、付费用户',
+  `regist_30_user` string COMMENT '活跃-注册<=30为新用户',
+  `user_vip_tag` string COMMENT '会员身份标签',
+  `is_use_ycpad` smallint COMMENT '用户是否用过洋葱星球',
+  `business_user_pay_status_statistics` string COMMENT '商业化付费会员拆分为大会员付费、非大会员付费',
+  `business_user_pay_status_business` string COMMENT '大会员付费用户(统计日期之前买过大会员商品)、续费用户(统计日期之前买过正价课)、新用户(统计日期30天内注册的)、老用户(统计日期30以前注册的)',
+  `user_attribution` string COMMENT '用户归属',
+  `real_identity` string COMMENT '用户身份',
+  `user_lifecycle_stage` string COMMENT '生命周期阶段  引入期：注册天数 <= 13 （注册当天是0）成长期：14 <= 注册天数 <= 30 成熟期：注册天数31天及以上',
+  `active_recency_status` string COMMENT ' 用户近期活跃状态',
+  `today_active_depth_level` string COMMENT '今日活跃深度层级'
+) COMMENT '一个用户一个端口一条记录' PARTITIONED BY (`day` int COMMENT '分区字段-日') ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.orc.OrcSerde' STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat' LOCATION 'tos://yc-data-platform/user/hive/warehouse/aws.db/mid_active_user_os_day' TBLPROPERTIES (
+  'alias' = 'C端活跃用户端口汇总日表',
+  'bucketing_version' = '2',
+  'last_modified_by' = 'huaxiong',
+  'last_modified_time' = '1763710502',
+  'spark.sql.create.version' = '2.2 or prior',
+  'spark.sql.sources.schema.numPartCols' = '1',
+  'spark.sql.sources.schema.numParts' = '2',
+  'spark.sql.sources.schema.part.0' = '{"type":"struct","fields":[{"name":"user_sk","type":"integer","nullable":true,"metadata":{}},{"name":"mid_stage_name","type":"string","nullable":true,"metadata":{"comment":"中学定义学段:初中、高中、null、其他"}},{"name":"active_type","type":"string","nullable":true,"metadata":{"comment":"(中学)活跃类型：1新增 2 持续 3回流"}},{"name":"client_os","type":"string","nullable":true,"metadata":{"comment":"端口"}},{"name":"active_user","type":"string","nullable":true,"metadata":{"comment":"访问活跃用户sk"}},{"name":"learn_active_user","type":"string","nullable":true,"metadata":{"comment":"学习活跃用户sk"}},{"name":"learn_active_user_topic_finish_cnt","type":"integer","nullable":true,"metadata":{"comment":"学习活跃用户知识点完成次数（学习活跃次数)"}},{"name":"video_active_user","type":"string","nullable":true,"metadata":{"comment":"(课程)视频活跃用户sk"}},{"name":"watch_video_cnt","type":"integer","nullable":true,"metadata":{"comment":"(课程)视频开始次数"}},{"name":"serious_watch_video_user","type":"string","nullable":true,"metadata":{"comment":"(视频活跃用户)认真观看用户"}},{"name":"serious_watch_video_cnt","type":"integer","nullable":true,"metadata":{"comment":"视频认真观看次数"}},{"name":"finish_watch_user","type":"string","nullable":true,"metadata":{"comment":"(视频活跃用户)视频完播用户sk"}},{"name":"finish_watch_video_cnt","type":"integer","nullable":true,"metadata":{"comment":"视频完播次数"}},{"name":"exercise_active_user","type":"string","nullable":true,"metadata":{"comment":"专项练习活跃用户sk"}},{"name":"exercise_cnt","type":"integer","nullable":true,"metadata":{"comment":"专项练习次数"}},{"name":"day_timestamp","type":"timestamp","nullable":true,"metadata":{"comment":"日期时间戳"}},{"name":"mid_revenue_max_amount","type":"double","nullable":true,"metadata":{"comment":"统计周期内购买过的中学营收最大订单实付金额"}},{"name":"mid_revenue_max_original_amount","type":"double","nullable":true,"metadata":{"comment":"统计周期内购买过的最大订单原价金额"}},{"name":"exercise_course_package_problem_cnt","type":"integer","nullable":true,"metadata":{"comment":"专项做题次数（专项练习+专项课程包做题次数）"}},{"name":"non_exercise_problem_cnt","type":"integer","nullable":true,"metadata":{"comment":"非专项练习做题次数（剔除专项练习做题题目，专项课程包）"}},{"name":"non_exercise_cnt","type":"integer","nullable":true,"metadata":{"comment":"非专项练习次数"}},{"name":"non_exercise_finish_cnt","type":"integer","nullable":true,"metadata":{"comment":"非专项练习完成次数"}},{"name":"total_exercise_cnt","type":"integer","nullable":true,"metadata":{"comment":"所有模块练习次数"}},{"name":"total_exercise_finish_cnt","type":"integer","nullable":true,"metadata":{"comment":"所有模块练习完成次数"}},{"name":"total_problem_cnt","type":"integer","nullable":true,"metadata":{"comment":"所有模块练习做题次数"}},{"name":"exercise_home_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入做题入口页次数"}},{"name":"exercise_first_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入做题模块首页次数"}},{"name":"exercise_detail_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入试题页次数"}},{"name":"exercise_submit_answer_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入答题提交答案页次数"}},{"name":"exercise_finsh_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入答题完成页次数"}},{"name":"app_first_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入app首页次数"}},{"name":"chapter_list_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入章节列表页次数"}},{"name":"section_detail_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入小节详情页次数"}},{"name":"is_teach_user","type":"integer","nullable":true,"metadata":{"comment":"是否在教学班"}},{"name":"u_user","type":"string","nullable":true,"metadata":{"comment":"用户ID"}},{"name":"course_video_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入课程视频页面次数（漏斗侧)"}},{"name":"section_detail_exposure_page_cnt","type":"integer","nullable":true,"metadata":{"comment":"进入小节详情页（曝光节点）次数"}},{"name":"regist_time_sk","type":"integer","nullable":true,"metadata":{"comment":"注册时间sk"}},{"name":"grade","type":"string","nullable":true,"metadata":{"comment":"用户填写年级，20190409之前走修正"}},{"name":"d_app_version","type":"strin',
+  'spark.sql.sources.schema.part.1' = 'g","nullable":true,"metadata":{"comment":"用户在活跃端口最后一次活跃版本"}},{"name":"non_exercise_problem_user","type":"string","nullable":true,"metadata":{"comment":"非专项练习做题用户"}},{"name":"is_vip_user","type":"short","nullable":true,"metadata":{"comment":"是否是vip用户"}},{"name":"ss_arr","type":{"type":"array","elementType":"string","containsNull":true},"nullable":true,"metadata":{"comment":"vip的学段学科数组"}},{"name":"watch_course_video_duration","type":"integer","nullable":true,"metadata":{"comment":"观看课程视频时长"}},{"name":"use_duration_m","type":"integer","nullable":true,"metadata":{"comment":"统计周期内使用app时长(单位：分钟)"}},{"name":"finish_exercise_cnt","type":"integer","nullable":true,"metadata":{"comment":"完成专项练习次数"}},{"name":"open_exercise_synchronous_training_cnt","type":"integer","nullable":true,"metadata":{"comment":"开始同步练练习次数"}},{"name":"finish_exercise_synchronous_training_cnt","type":"integer","nullable":true,"metadata":{"comment":"完成同步练练习次数"}},{"name":"open_exercise_pk_cnt","type":"integer","nullable":true,"metadata":{"comment":"开始pk练习次数"}},{"name":"finish_exercise_pk_cnt","type":"integer","nullable":true,"metadata":{"comment":"完成pk练习次数"}},{"name":"open_exercise_challenge_question_cnt","type":"integer","nullable":true,"metadata":{"comment":"开始挑战学霸练习次数"}},{"name":"finish_exercise_challenge_question_cnt","type":"integer","nullable":true,"metadata":{"comment":"完成挑战学霸练习次数"}},{"name":"user_pay_status_statistics","type":"string","nullable":true,"metadata":{"comment":"统计维度：保持新增、老未、付费的标签"}},{"name":"user_pay_status_business","type":"string","nullable":true,"metadata":{"comment":"策略维度：新用户、老用户、付费用户"}},{"name":"regist_30_user","type":"string","nullable":true,"metadata":{"comment":"活跃-注册<=30为新用户"}},{"name":"user_vip_tag","type":"string","nullable":true,"metadata":{"comment":"会员身份标签"}},{"name":"day","type":"integer","nullable":true,"metadata":{"comment":"分区字段-日"}}]}',
+  'spark.sql.sources.schema.partCol.0' = 'day',
+  'transient_lastDdlTime' = '1763710502'
+)
+
+=====================================================
+--第三段、枚举值
+--暂时没有用到

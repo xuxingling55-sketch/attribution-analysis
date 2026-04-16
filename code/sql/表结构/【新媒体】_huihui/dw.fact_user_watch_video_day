@@ -1,0 +1,173 @@
+=====================================================
+--第一段、表头注释
+-- {视频观看记录表} {dw}.{fact_user_watch_video_day}
+-- =====================================================
+--
+-- 【表粒度】★必填
+--  一次观看视频=一条记录（watch_id +user_sk 唯一标识）  
+--  同一个用户（u_user）会对应多条观看视频id（watch_id）
+--  可能不同人看视频的watch_id会上报重复	
+--   
+-- 【统计口径】
+-- 观看时长（秒）=sum(learn_duration) 
+-- 观看天数=count(distinct date_sk)
+-- 观看次数=count(distinct watch_id)
+-- 完播次数（播完所看视频）=count(case when is_finish=true then  watch_id  end)
+-- 认真观看次数=count(case when finish_type_level>6  then  watch_id  end)
+--
+-- 【常用筛选条件】
+--   ★必加条件（任何查询都必须带）：
+--   ★day between 开始时间 and  结束时间     --分区表，需要选时间区间，格式yyyymmdd
+--
+--   场景条件（按分析目的选加）：
+--   is_finish=true      --视频完播
+--   finish_type_level>6   --有认真观看过视频
+
+=====================================================
+--第二段：DDL 建表语句
+
+CREATE EXTERNAL TABLE `dw`.`fact_user_watch_video_day` (
+  `watch_id` string COMMENT '本次观看视频的唯一id',
+  `user_sk` int COMMENT '用户数仓sk',
+  `video_sk` int COMMENT '数仓中生成的视频代理键',
+  `video_type_level1` string COMMENT '视频类型英文（show/course/intro）',
+  `video_duration` double COMMENT '视频时长（秒）',
+  `video_enter_type` string COMMENT '视频入口类型（主线/课程包）',
+  `date_sk` int COMMENT '看视频的日期',
+  `hour_sk` int COMMENT '看视频的小时，0到23',
+  `term_sk` int COMMENT '学段学科学期教材版本维度',
+  `client_os` string COMMENT '观看视频的客户端os（android/ios/pc）',
+  `role` string COMMENT '用户角色',
+  `product_id` string COMMENT '产品名（例如初中、PC、H5、小程序） ',
+  `app_version` string COMMENT '客户端版本号',
+  `is_charge_video` boolean COMMENT '本次观看的视频是否是付费视频',
+  `server_time` timestamp COMMENT '开始看视频的时间',
+  `event_time` timestamp COMMENT '开始看视频的时间 用户端时间',
+  `learn_duration` int COMMENT ' 4.26之后 这个字段为不含暂停的时长',
+  `is_load_error` boolean COMMENT '视频是否加载失败 startVideo后报错',
+  `load_error_count` int COMMENT '视频加载失败次数',
+  `is_finish` boolean COMMENT '视频是否完成（是否完播）',
+  `exit_video_time` int COMMENT '退出观看视频内的时间点——毫秒',
+  `is_topic_finish` boolean COMMENT '本次看完视频是否完成了知识点',
+  `finish_type_level` int COMMENT '观看时长/视频长度的百分比，精确到十位向下取整。如[0,10%)取0，[10%, 20%)取1，。。。，[90%，100%）取9,[100%,+∞)取10',
+  `pause_count` int COMMENT '本次观看视频过程中暂停次数',
+  `drag_forth_count` int COMMENT '本次观看视频过程中向前拖拽次数',
+  `drag_back_count` int COMMENT '本次观看视频过程中向后拖拽次数',
+  `is_share` boolean COMMENT '本次是否分享',
+  `u_vip` string COMMENT '用户vip状态',
+  `create_time` timestamp COMMENT '源系统创建条目的时间',
+  `update_time` timestamp COMMENT '源系统修改条目的时间',
+  `dw_insert_time` timestamp COMMENT 'ETL插入记录的时间',
+  `dw_update_time` timestamp COMMENT 'ETL修改记录的时间',
+  `u_user` string COMMENT '用户id',
+  `error_type` string COMMENT '视频开始前报错、视频开始后报错',
+  `learn_duration_business` int COMMENT '开始播放到结束的时间减非主动暂停时长（4.26.0以后）(秒)',
+  `topic_sk` int COMMENT '知识点数仓id',
+  `is_skip` boolean COMMENT '是否跳过视频直接去做题',
+  `course_package_id` string COMMENT '课程包id',
+  `video_scene` string COMMENT '视频观看场景',
+  `download_channel` string COMMENT '下载渠道',
+  `device_id` string COMMENT '设备id',
+  `client_os_version` string COMMENT '操作系统版本号',
+  `network_type` string COMMENT '用户网络类型，比如wifi',
+  `wx_version` string COMMENT '微信版本号',
+  `phone_brand` string COMMENT '用户手机品牌',
+  `phone_model` string COMMENT '手机型号',
+  `is_try_watch` boolean COMMENT '是否试看',
+  `is_switch_resolution` boolean COMMENT '是否切换清晰度',
+  `is_switch_caption` boolean COMMENT '是否开关字幕',
+  `is_download` boolean COMMENT '是否下载',
+  `is_switch_segment` boolean COMMENT '是否点击切换节点',
+  `is_switch_speed` boolean COMMENT '是否变速',
+  `is_use_experience` boolean COMMENT '是否使用体验机会',
+  `is_ai_recommend` boolean COMMENT '是否AI推荐视频',
+  `time_out_count` int COMMENT '加载超时次数',
+  `lagged_count` int COMMENT '卡顿次数',
+  `error_count` int COMMENT '报错次数',
+  `is_voluntarily_exit` boolean COMMENT '用户是否主动退出',
+  `grade` string COMMENT '用户填写年级',
+  `mid_grade` string COMMENT '中学修正年级',
+  `mid_stage_name` string COMMENT '中学修正学段',
+  `gender` string COMMENT '用户性别',
+  `regist_time` timestamp COMMENT '注册时间',
+  `regist_time_sk` int COMMENT '注册时间sk',
+  `channel` string COMMENT '注册渠道',
+  `u_from` string COMMENT '系统平台',
+  `type` string COMMENT '注册方式(枚举值)',
+  `is_put_channel` smallint COMMENT '是否投放渠道',
+  `province` string COMMENT '省',
+  `province_code` string COMMENT '省code',
+  `city` string COMMENT '市',
+  `city_code` string COMMENT '市code',
+  `area` string COMMENT '区',
+  `area_code` string COMMENT '区code',
+  `is_test_user` smallint COMMENT '是否测试用户',
+  `is_teach_user` smallint COMMENT '是否教学班用户',
+  `is_admin_room` smallint COMMENT '是否行政班用户',
+  `is_room_user` smallint COMMENT '是否有班用户',
+  `is_new_user` smallint COMMENT '是否新用户',
+  `school_sk` int COMMENT '学校sk',
+  `school_id` string COMMENT '学校id',
+  `school_sk1` int COMMENT '学校sk1',
+  `school_id1` string COMMENT '学校id1',
+  `user_attribution` string COMMENT '用户活跃时归属',
+  `regist_user_attribution` string COMMENT '用户注册当天归属',
+  `room_id` string COMMENT '用户行政班id',
+  `agent_id` string COMMENT '用户所在学校的代理商id',
+  `ss_arr` array < string > COMMENT 'vip的学段学科数组',
+  `is_vip_user` smallint COMMENT '是否是vip用户',
+  `barrage_notice_count` int COMMENT '点击弹幕须知',
+  `barrage_colose_count` int COMMENT '点击关闭弹幕',
+  `barrage_open_count` int COMMENT '点击开启弹幕',
+  `barrage_any_count` int COMMENT '点击任意一条弹幕',
+  `barrage_like_count` int COMMENT '点击点赞弹幕',
+  `barrage_report_count` int COMMENT '点击举报弹幕',
+  `barrage_role_count` int COMMENT '点击弹幕角色',
+  `barrage_preset_count` int COMMENT '点击预设弹幕',
+  `barrage_send_count` int COMMENT '点击发送弹幕',
+  `qa_count` int COMMENT '点击答疑按钮',
+  `tag_count` int COMMENT '点击视频标记按钮',
+  `tag_label_count` int COMMENT '点击添加视频标记',
+  `screen_shot_count` int COMMENT '点击截屏按钮',
+  `feed_back_count` int COMMENT '点击视频反馈按钮',
+  `feed_back_commit_count` int COMMENT '点击提交视频反馈',
+  `caption_open_count` int COMMENT '点击打开字幕',
+  `caption_close_count` int COMMENT '点击关闭字幕',
+  `more_action_count` int COMMENT '点击更多按钮（三个点）',
+  `init_speed` string COMMENT '初始速度',
+  `init_cur_resolution` string COMMENT '初始清晰度',
+  `init_timestamp` int COMMENT '初始播放时间点',
+  `session_id` string COMMENT '本次观看视频中，如果存在多个视频片段，此为唯一id',
+  `pay` boolean COMMENT '知识点是否付费',
+  `is_free_time` boolean COMMENT '知识点是否限免',
+  `is_buy` smallint COMMENT '判断用户在观看课程包视频时，是否已处于购买状态',
+  `problem_id` string COMMENT '解析习题 id',
+  `re_start_player` boolean COMMENT '视频重播',
+  `is_like` boolean COMMENT '本次观看视频是否点赞',
+  `sn_code` string COMMENT 'pad 设备码',
+  `is_pad_device` boolean COMMENT '是否pad设备',
+  `video_enter_position` string COMMENT '视频入口位置，research_type1：首页研究tab入口1(首页右侧播放器样式入口)，research_type2：首页研究tab入口2(首页二级tab上方平铺入口)，research_type3：首页研究tab入口3(首页左侧IP形象位置入口)，treasure_type1：宝藏tab全息天幕入口'
+) COMMENT '一次观看视频一条记录' PARTITIONED BY (`day` int) ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.orc.OrcSerde' STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat' LOCATION 'tos://yc-data-platform/user/hive/warehouse/dw.db/fact_user_watch_video' TBLPROPERTIES (
+  'alias' = '视频观看记录表',
+  'bucketing_version' = '2',
+  'is_core' = 'true',
+  'last_modified_by' = 'liuguanxiong',
+  'last_modified_time' = '1727322430',
+  'primary_key' = 'watch_id,session_id',
+  'spark.sql.create.version' = '2.2 or prior',
+  'spark.sql.sources.schema.numPartCols' = '1',
+  'spark.sql.sources.schema.numParts' = '3',
+  'spark.sql.sources.schema.part.0' = '{"type":"struct","fields":[{"name":"watch_id","type":"string","nullable":true,"metadata":{"comment":"本次观看视频的唯一id"}},{"name":"user_sk","type":"integer","nullable":true,"metadata":{"comment":"用户数仓sk"}},{"name":"video_sk","type":"integer","nullable":true,"metadata":{"comment":"数仓中生成的视频代理键"}},{"name":"video_type_level1","type":"string","nullable":true,"metadata":{"comment":"视频类型英文（show/course/intro）"}},{"name":"video_duration","type":"double","nullable":true,"metadata":{"comment":"视频时长（秒）"}},{"name":"video_enter_type","type":"string","nullable":true,"metadata":{"comment":"视频入口类型（主线/课程包）"}},{"name":"date_sk","type":"integer","nullable":true,"metadata":{"comment":"看视频的日期"}},{"name":"hour_sk","type":"integer","nullable":true,"metadata":{"comment":"看视频的小时，0到23"}},{"name":"term_sk","type":"integer","nullable":true,"metadata":{"comment":"学段学科学期教材版本维度"}},{"name":"client_os","type":"string","nullable":true,"metadata":{"comment":"观看视频的客户端os（android/ios/pc）"}},{"name":"role","type":"string","nullable":true,"metadata":{"comment":"用户角色"}},{"name":"product_id","type":"string","nullable":true,"metadata":{"comment":"产品名（例如初中、PC、H5、小程序） "}},{"name":"app_version","type":"string","nullable":true,"metadata":{"comment":"客户端版本号"}},{"name":"is_charge_video","type":"boolean","nullable":true,"metadata":{"comment":"本次观看的视频是否是付费视频"}},{"name":"server_time","type":"timestamp","nullable":true,"metadata":{"comment":"开始看视频的时间"}},{"name":"event_time","type":"timestamp","nullable":true,"metadata":{"comment":"开始看视频的时间 用户端时间"}},{"name":"learn_duration","type":"integer","nullable":true,"metadata":{"comment":" 4.26之后 这个字段为不含暂停的时长"}},{"name":"is_load_error","type":"boolean","nullable":true,"metadata":{"comment":"视频是否加载失败 startVideo后报错"}},{"name":"load_error_count","type":"integer","nullable":true,"metadata":{"comment":"视频加载失败次数"}},{"name":"is_finish","type":"boolean","nullable":true,"metadata":{"comment":"视频是否完成（是否完播）"}},{"name":"exit_video_time","type":"integer","nullable":true,"metadata":{"comment":"退出观看视频内的时间点——毫秒"}},{"name":"is_topic_finish","type":"boolean","nullable":true,"metadata":{"comment":"本次看完视频是否完成了知识点"}},{"name":"finish_type_level","type":"integer","nullable":true,"metadata":{"comment":"观看时长/视频长度的百分比，精确到十位向下取整。如[0,10%)取0，[10%, 20%)取1，。。。，[90%，100%）取9,[100%,+∞)取10"}},{"name":"pause_count","type":"integer","nullable":true,"metadata":{"comment":"本次观看视频过程中暂停次数"}},{"name":"drag_forth_count","type":"integer","nullable":true,"metadata":{"comment":"本次观看视频过程中向前拖拽次数"}},{"name":"drag_back_count","type":"integer","nullable":true,"metadata":{"comment":"本次观看视频过程中向后拖拽次数"}},{"name":"is_share","type":"boolean","nullable":true,"metadata":{"comment":"本次是否分享"}},{"name":"u_vip","type":"string","nullable":true,"metadata":{"comment":"用户vip状态"}},{"name":"create_time","type":"timestamp","nullable":true,"metadata":{"comment":"源系统创建条目的时间"}},{"name":"update_time","type":"timestamp","nullable":true,"metadata":{"comment":"源系统修改条目的时间"}},{"name":"dw_insert_time","type":"timestamp","nullable":true,"metadata":{"comment":"ETL插入记录的时间"}},{"name":"dw_update_time","type":"timestamp","nullable":true,"metadata":{"comment":"ETL修改记录的时间"}},{"name":"u_user","type":"string","nullable":true,"metadata":{"comment":"用户id"}},{"name":"error_type","type":"string","nullable":true,"metadata":{"comment":"视频开始前报错、视频开始后报错"}},{"name":"learn_duration_business","type":"integer","nullable":true,"metadata":{"comment":"开始播放到结束的时间减非主动暂停时长（4.26.0以后）(秒)"}},{"name":"topic_sk","type":"integer","nullable":true,"metadata":{"comment":"知识点数仓id"}},{"name":"is_skip","type":"boolean","nullable":true,"metadata":{"comment":"是否跳过视频直接去做题"}},{"name":"course_package_id","type":"string","nullable":true,"metadata":{"comment":"课程包id"}},{"name":"video_scene","type":"string","nullable":true,"metadata":{"comment":"视频观看场景"}},{"name":"download_channel","type":"string","nullable":true,"metadata":{"comment":"下载渠道"}},{"name":"device_id","type":"string","nullable":true,"metadata":{"comment":"设备id"}},{"name":"client_os_version","type":"string","nu',
+  'spark.sql.sources.schema.part.1' = 'llable":true,"metadata":{"comment":"操作系统版本号"}},{"name":"network_type","type":"string","nullable":true,"metadata":{"comment":"用户网络类型，比如wifi"}},{"name":"wx_version","type":"string","nullable":true,"metadata":{"comment":"微信版本号"}},{"name":"phone_brand","type":"string","nullable":true,"metadata":{"comment":"用户手机品牌"}},{"name":"phone_model","type":"string","nullable":true,"metadata":{"comment":"手机型号"}},{"name":"is_try_watch","type":"boolean","nullable":true,"metadata":{"comment":"是否试看"}},{"name":"is_switch_resolution","type":"boolean","nullable":true,"metadata":{"comment":"是否切换清晰度"}},{"name":"is_switch_caption","type":"boolean","nullable":true,"metadata":{"comment":"是否开关字幕"}},{"name":"is_download","type":"boolean","nullable":true,"metadata":{"comment":"是否下载"}},{"name":"is_switch_segment","type":"boolean","nullable":true,"metadata":{"comment":"是否点击切换节点"}},{"name":"is_switch_speed","type":"boolean","nullable":true,"metadata":{"comment":"是否变速"}},{"name":"is_use_experience","type":"boolean","nullable":true,"metadata":{"comment":"是否使用体验机会"}},{"name":"is_ai_recommend","type":"boolean","nullable":true,"metadata":{"comment":"是否AI推荐视频"}},{"name":"time_out_count","type":"integer","nullable":true,"metadata":{"comment":"加载超时次数"}},{"name":"lagged_count","type":"integer","nullable":true,"metadata":{"comment":"卡顿次数"}},{"name":"error_count","type":"integer","nullable":true,"metadata":{"comment":"报错次数"}},{"name":"is_voluntarily_exit","type":"boolean","nullable":true,"metadata":{"comment":"用户是否主动退出"}},{"name":"grade","type":"string","nullable":true,"metadata":{"comment":"用户填写年级"}},{"name":"mid_grade","type":"string","nullable":true,"metadata":{"comment":"中学修正年级"}},{"name":"mid_stage_name","type":"string","nullable":true,"metadata":{"comment":"中学修正学段"}},{"name":"gender","type":"string","nullable":true,"metadata":{"comment":"用户性别"}},{"name":"regist_time","type":"timestamp","nullable":true,"metadata":{"comment":"注册时间"}},{"name":"regist_time_sk","type":"integer","nullable":true,"metadata":{"comment":"注册时间sk"}},{"name":"channel","type":"string","nullable":true,"metadata":{"comment":"注册渠道"}},{"name":"u_from","type":"string","nullable":true,"metadata":{"comment":"系统平台"}},{"name":"type","type":"string","nullable":true,"metadata":{"comment":"注册方式(枚举值)"}},{"name":"is_put_channel","type":"short","nullable":true,"metadata":{"comment":"是否投放渠道"}},{"name":"province","type":"string","nullable":true,"metadata":{"comment":"省"}},{"name":"province_code","type":"string","nullable":true,"metadata":{"comment":"省code"}},{"name":"city","type":"string","nullable":true,"metadata":{"comment":"市"}},{"name":"city_code","type":"string","nullable":true,"metadata":{"comment":"市code"}},{"name":"area","type":"string","nullable":true,"metadata":{"comment":"区"}},{"name":"area_code","type":"string","nullable":true,"metadata":{"comment":"区code"}},{"name":"is_test_user","type":"short","nullable":true,"metadata":{"comment":"是否测试用户"}},{"name":"is_teach_user","type":"short","nullable":true,"metadata":{"comment":"是否教学班用户"}},{"name":"is_admin_room","type":"short","nullable":true,"metadata":{"comment":"是否行政班用户"}},{"name":"is_room_user","type":"short","nullable":true,"metadata":{"comment":"是否有班用户"}},{"name":"is_new_user","type":"short","nullable":true,"metadata":{"comment":"是否新用户"}},{"name":"school_sk","type":"integer","nullable":true,"metadata":{"comment":"学校sk"}},{"name":"school_id","type":"string","nullable":true,"metadata":{"comment":"学校id"}},{"name":"school_sk1","type":"integer","nullable":true,"metadata":{"comment":"学校sk1"}},{"name":"school_id1","type":"string","nullable":true,"metadata":{"comment":"学校id1"}},{"name":"user_attribution","type":"string","nullable":true,"metadata":{"comment":"用户活跃时归属"}},{"name":"regist_user_attribution","type":"string","nullable":true,"metadata":{"comment":"用户注册当天归属"}},{"name":"room_id","type":"string","nullable":true,"metadata":{"comment":"用户行政班id"}},{"name":"agent_id","type":"string","nullable":true,"metadata":{"comment":"用户所在学校的代理商id"}},{"name":"ss_arr","type',
+  'spark.sql.sources.schema.part.2' = '":{"type":"array","elementType":"string","containsNull":true},"nullable":true,"metadata":{"comment":"vip的学段学科数组"}},{"name":"is_vip_user","type":"short","nullable":true,"metadata":{"comment":"是否是vip用户"}},{"name":"barrage_notice_count","type":"integer","nullable":true,"metadata":{"comment":"点击弹幕须知"}},{"name":"barrage_colose_count","type":"integer","nullable":true,"metadata":{"comment":"点击关闭弹幕"}},{"name":"barrage_open_count","type":"integer","nullable":true,"metadata":{"comment":"点击开启弹幕"}},{"name":"barrage_any_count","type":"integer","nullable":true,"metadata":{"comment":"点击任意一条弹幕"}},{"name":"barrage_like_count","type":"integer","nullable":true,"metadata":{"comment":"点击点赞弹幕"}},{"name":"barrage_report_count","type":"integer","nullable":true,"metadata":{"comment":"点击举报弹幕"}},{"name":"barrage_role_count","type":"integer","nullable":true,"metadata":{"comment":"点击弹幕角色"}},{"name":"barrage_preset_count","type":"integer","nullable":true,"metadata":{"comment":"点击预设弹幕"}},{"name":"barrage_send_count","type":"integer","nullable":true,"metadata":{"comment":"点击发送弹幕"}},{"name":"qa_count","type":"integer","nullable":true,"metadata":{"comment":"点击答疑按钮"}},{"name":"tag_count","type":"integer","nullable":true,"metadata":{"comment":"点击视频标记按钮"}},{"name":"tag_label_count","type":"integer","nullable":true,"metadata":{"comment":"点击添加视频标记"}},{"name":"screen_shot_count","type":"integer","nullable":true,"metadata":{"comment":"点击截屏按钮"}},{"name":"feed_back_count","type":"integer","nullable":true,"metadata":{"comment":"点击视频反馈按钮"}},{"name":"feed_back_commit_count","type":"integer","nullable":true,"metadata":{"comment":"点击提交视频反馈"}},{"name":"caption_open_count","type":"integer","nullable":true,"metadata":{"comment":"点击打开字幕"}},{"name":"caption_close_count","type":"integer","nullable":true,"metadata":{"comment":"点击关闭字幕"}},{"name":"more_action_count","type":"integer","nullable":true,"metadata":{"comment":"点击更多按钮（三个点）"}},{"name":"init_speed","type":"string","nullable":true,"metadata":{"comment":"初始速度"}},{"name":"init_cur_resolution","type":"string","nullable":true,"metadata":{"comment":"初始清晰度"}},{"name":"init_timestamp","type":"integer","nullable":true,"metadata":{"comment":"初始播放时间点"}},{"name":"session_id","type":"string","nullable":true,"metadata":{"comment":"本次观看视频中，如果存在多个视频片段，此为唯一id"}},{"name":"pay","type":"boolean","nullable":true,"metadata":{"comment":"知识点是否付费"}},{"name":"is_free_time","type":"boolean","nullable":true,"metadata":{"comment":"知识点是否限免"}},{"name":"is_buy","type":"short","nullable":true,"metadata":{"comment":"判断用户在观看课程包视频时，是否已处于购买状态"}},{"name":"day","type":"integer","nullable":true,"metadata":{}}]}',
+  'spark.sql.sources.schema.partCol.0' = 'day',
+  'transient_lastDdlTime' = '1727322430'
+)
+
+
+=====================================================
+--第三段、枚举值
+
+-- | 枚举值 | 含义 |
+-- |--------|------|
+-- | finish_type_level | >6 |  --"部分枚举"

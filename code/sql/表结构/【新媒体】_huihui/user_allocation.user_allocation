@@ -1,0 +1,44 @@
+=====================================================
+--第一段、表头注释
+-- {用户服务期表} {user_allocation}.{user_allocation}
+-- =====================================================
+--
+-- 【表粒度】★必填
+--  一个id=一条记录（id 唯一标识）
+--  用户会有重复的情况
+--
+-- 【常用关联】
+--  用户服务期开始时间、结算时间、全域用户归属
+--  -本表.user_id=promote_code.onion_password_activate.user_id
+--  -本表.user_id=dw.fact_user_redeem_code.user_id
+
+-- 【注意事项】
+--  一个用户多次出现的情况，例如A用户第一次领取口令或兑换码后存一条，服务期过期后在下单或领取又存一条
+
+
+=====================================================
+--第二段：DDL 建表语句
+CREATE TABLE
+  `user_allocation`.`user_allocation` (
+    `id` string COMMENT '-',
+    `user_id` string COMMENT '用户id',
+    `team_id` bigint COMMENT '所属团队id',
+    `start_time` timestamp COMMENT '服务器开始时间',
+    `end_time` timestamp COMMENT '服务期截止时间',
+    `state` string COMMENT '是否有效',
+    `created_at` timestamp COMMENT '-',
+    `updated_at` timestamp COMMENT '-',
+    `deleted_at` timestamp COMMENT '-',
+    `initial_phone` string COMMENT '初始手机号',
+    `end_reason` string COMMENT '服务期终止原因:expired自然过期、abandon主动放弃、cancelAfterSales商品退款后权益不足'
+  ) ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+WITH
+  SERDEPROPERTIES ('field.delim' = '', 'serialization.format' = '') STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat' LOCATION 'tos://yc-data-platform/user/hive/warehouse/user_allocation.db/user_allocation' TBLPROPERTIES (
+    'STATS_GENERATED_VIA_STATS_TASK' = 'true',
+    'bucketing_version' = '2',
+    'transient_lastDdlTime' = '1743524094'
+  )
+
+=====================================================
+--第三段、枚举值
+--暂时没有用到

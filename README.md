@@ -1,143 +1,74 @@
-# 归因分析 AI 工作流
+# 归因分析 AI 工作流 & 数据知识库
 
-> 适用于在线教育/电销行业的业务指标异动归因分析工具
-> 输入一句话描述异动 → 自动查数据 → 输出结构化 Markdown 报告
+> 集成了**业务指标异动分析工具**与 **AI 原生数据知识库**的统一工作流。
 
----
-
-## 功能概览
-
-- 自动连接 Impala 数据仓库（通过 SSH 隧道）
-- 覆盖 **6 大假设维度**：流量结构、用户结构、电销执行、商品结构、外部因素、产品功能
-- 标准化 SQL 口径（含踩坑规避）
-- 自动生成 Markdown 报告，含根因排序、假设验证汇总、建议行动
-
----
-
-## 快速开始
-
-### 1. 安装依赖
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. 配置连接信息
-
-```bash
-cp config.example.yaml config.yaml
-# 编辑 config.yaml，填入你的 SSH + DB 信息
-```
-
-### 3. 修改分析参数
-
-打开 `main.py`，修改顶部的配置段：
-
-```python
-# 数据库连接
-config = DBConfig(
-    ssh_host     = "221.194.xxx.xxx",
-    ssh_user     = "master",
-    ssh_password = "your_password",
-    db_host      = "10.17.2.45",
-    db_port      = 10010,
-    db_user      = "your_user",
-    db_pass      = "your_pass",
-)
-
-# 分析参数
-ANOMALY_DESC = "上周9年级线索转化率和客单价都跌了"
-GRADE        = "九年级"
-```
-
-以及时间窗口（按实际日期替换）：
-
-```python
-WEEKS_INT = [
-    ("上周",   20260323, 20260329),
-    ("上上周",  20260316, 20260322),
-    ...
-]
-WEEKS_STR = [
-    ("上周",   "2026-03-23", "2026-03-30"),
-    ("上上周",  "2026-03-16", "2026-03-23"),
-]
-```
-
-### 4. 运行
-
-```bash
-python main.py
-```
-
-报告自动保存到 `reports/` 目录。
-
----
-
-## 输出示例
-
-见 [`examples/归因分析报告_9年级线索异动.md`](examples/归因分析报告_9年级线索异动.md)
-
-关键结论：
-- 🔴 **主因**：寒促结束后活跃流量萎缩（4周累计↓13.7%）
-- 🔴 **主因**：组合品销售大幅下滑（↓26%），直接拉低客单价
-- ⚪ **排除**：用户分层稳定、电销执行正常（人效反升25%）
+## 核心理念
+本项目旨在解决数据分析中的两个痛点：
+1. **取数难**：通过 AI 原生知识库（.cursor/knowledge），让 AI Agent 能够准确理解业务口径和表结构，自动生成高质量 SQL。
+2. **分析累**：通过自动化归因脚本（main.py），实现从"发现异动"到"产出归因报告"的全流程自动化。
 
 ---
 
 ## 目录结构
 
 ```
-attribution-analysis/
-├── main.py                 # 主入口，修改顶部参数后直接运行
-├── src/
-│   ├── db.py               # SSH 隧道 + Impala 连接
-│   ├── queries.py          # 各维度标准 SQL 查询
-│   └── report.py           # Markdown 报告生成
-├── examples/               # 真实案例示例
-├── docs/                   # 方法论文档
-├── config.example.yaml     # 连接配置模板（不含密码）
-├── requirements.txt
-└── .gitignore              # config.yaml 已加入忽略列表
+.
+├── .cursor/                # AI 知识库与规则 (核心脑部)
+│   ├── knowledge/          # 业务指标词典、表关系、SQL 模板
+│   └── rules/              # SQL 编写实时约束规范
+├── code/sql/               # 数据资产 (核心资产)
+│   └── 表结构/              # 按业务域划分的 DDL 及其详尽元数据
+├── src/                    # 归因分析 Python 源码
+├── main.py                 # 归因分析执行入口
+├── docs/                   # 方法论与框架文档
+├── examples/               # 实战归因案例
+├── config.example.yaml     # 数据库连接配置模板
+├── requirements.txt        # Python 依赖
+└── SKILL.md                # Accio Agent 技能定义文件
 ```
 
 ---
 
-## 数据口径说明
+## 一、自动化归因工具 (Attribution Analysis)
 
-| 字段 | 口径规则 |
-|------|---------|
-| `day` | **int 类型**（如 `20260325`），不是字符串 |
-| `paid_time` | timestamp，用于订单表日期筛选 |
-| `mid_grade` | 使用修正年级，不用 `grade` |
-| `real_identity` | 用户身份字段，禁用 `role` |
-| 活跃宽表必筛 | `product_id='01'`, `client_os IN ('android','ios','harmony')`, `active_user_attribution IN ('中学用户','小学用户','c')`, `is_test_user=0` |
-
----
-
-## 方法论
-
-详见 [`docs/归因分析框架v1.md`](docs/归因分析框架v1.md)
-
-**GMV 三因子分解**：
-
-```
-GMV = 流量（活跃用户）× 转化率 × 客单价
-```
-
-任何 GMV 异动，必然由三因子中至少一个驱动，逐层拆解、逐假设验证。
+### 快速开始
+1. **安装依赖**: `pip install -r requirements.txt`
+2. **配置连接**: `cp config.example.yaml config.yaml` 并填入 SSH/DB 信息。
+3. **运行分析**:
+   - 修改 `main.py` 中的 `ANOMALY_DESC`（异动描述）和 `GRADE`（年级）。
+   - 执行 `python main.py`。
+4. **查看报告**: 结果将生成在 `reports/` 目录，可参考 `examples/`。
 
 ---
 
-## 适用场景
+## 二、AI 数据知识库 (Knowledge Base)
 
-- 转化率异动（上升/下降）
-- 客单价异动
-- GMV 整体异动
-- 特定年级/渠道/商品异动
+本项目遵循 [`.cursor/knowledge/SPEC.md`](.cursor/knowledge/SPEC.md) 规范构建。
+
+### 核心组件
+- **Glossary (词典)**: 定义业务指标（如：日活、转化率）的权威计算公式。
+- **DDL as Document**: 所有的表结构信息（含枚举值、筛选条件、坑点）均直接写在 `code/sql/表结构/` 下的 SQL 注释中。
+- **Cursor Rules**: 配合 Cursor 编辑器，实时校验 SQL 编写是否符合业务口径。
+
+---
+
+## 三、Accio Agent 集成
+
+如果你使用 Accio Agent，可以直接通过 `SKILL.md` 加载该工作流：
+- **触发**: "分析上周XX年级转化率下降的原因"
+- **行为**: Agent 会自动解析日期，调用 Python 脚本跑数，并基于知识库进行根因推断。
+
+---
+
+## 数据口径摘要 (Cheat Sheet)
+| 字段 | 规则 |
+|---|---|
+| `day` | **int 类型** (如 20260325) |
+| `paid_time` | timestamp (订单日期筛选) |
+| `mid_grade` | 修正年级字段 |
+| 活跃宽表筛选 | `product_id='01'`, `is_test_user=0` 等 |
 
 ---
 
 ## License
-
 MIT

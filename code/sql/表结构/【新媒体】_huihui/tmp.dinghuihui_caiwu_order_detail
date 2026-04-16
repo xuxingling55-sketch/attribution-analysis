@@ -1,0 +1,77 @@
+=====================================================
+--第一段、表头注释
+-- {新媒体业绩表} {tmp}.{dinghuihui_caiwu_order_detail}
+-- =====================================================
+--
+-- 【表粒度】★必填
+--  一个订单=一条记录（order_id 唯一标识）
+--
+---【业务定位】
+--  仅新媒体全域口径订单，是新媒体财务结算营收的最权威的数据来源
+--  与tmp.dinghuihui_xmt_online_order_detail的区别：
+--   - 本表：仅新媒体全域业务订单（支付+激活+结算）
+--   - tmp.dinghuihui_xmt_online_order_detail：支付维度的订单
+--  选表原则：
+--  -新媒体全域口径营收分析 → 用本表
+-- 
+--【数据来源】
+--  dws.topic_order_detail 全公司订单宽表
+--  growth_order_thirdparty.thirdpart_general_order 视频号支付表
+--  aws.wechat_video_settle_bill 视频号结算表
+--  growth_order_thirdparty.weidian_order 微店支付表
+--  growth_order_thirdparty.weidian_settle_bill 微店结算表
+--  aws.xhs_order 小红书支付表
+--  growth_order_thirdparty.xhs_daily_settle 小红书结算表
+--  aws.tiktok_order 抖店支付表
+--  aws.tiktok_settle_bill 抖店结算表
+--  dw.fact_order_detail_refund 退款表（含各子订单的数据）
+--
+-- 【统计口径】
+--  支付口径
+--   -实际结算GMV = sum(nvl(shiji_jiesuan_gmv,0))
+--   -结算GMV = sum(nvl(wt_shiji_jiesuan_gmv,0))
+--   -结算后退款GMV = sum(nvl(wt_shiji_jiesuan_gmv,0))-sum(nvl(shiji_jiesuan_gmv,0))
+
+--
+-- 【常用筛选条件】
+--   ★必加条件（任何查询都必须带）
+--  自达播等：
+--   -zibo_dabo ='自播' --统计自播
+--   -zibo_dabo ='达播' --统计达播
+--   -zibo_dabo =小店自卖' --统计小店自卖
+
+--  支付渠道抖店、视频号等
+--  -channel = ‘xiaohongshu’ --统计小红书
+--  -channel = ‘shipinghaoxiaodian’ --统计视频号
+--  -channel = ‘doudian’ --统计抖店
+--  -channel = ‘weidian’ --统计微店
+--
+-- 【注意事项】
+--  使用时注意限制时间区间，对应字段rq
+
+
+
+
+=====================================================
+--第二段：DDL 建表语句
+CREATE TABLE tmp.dinghuihui_caiwu_order_detail (
+  rq STRING COMMENT '支付日期',
+  zibo_dabo STRING COMMENT '自达播类型',
+  order_id STRING COMMENT '订单ID',
+  uid STRING COMMENT '直播主播id',
+  nicheng STRING COMMENT '达人昵称',
+  shangwu STRING COMMENT '服务商务弃用',
+  channel STRING COMMENT '支付平台',
+  shop_name STRING COMMENT '店铺名',
+  good_sell_kind STRING COMMENT '商品售卖类型',
+  model_type STRING COMMENT '平板型号',
+  sku_group_good_id STRING COMMENT 'sku商品组id',
+  shiji_jiesuan_gmv DOUBLE COMMENT '实际结算GMV',
+  wt_shiji_jiesuan_gmv STRING COMMENT '结算GMV',
+  tiexi STRING COMMENT '贴息',
+  yingjian_chengben STRING COMMENT '硬件成本'
+)
+
+=====================================================
+--第三段、枚举值
+--无枚举值

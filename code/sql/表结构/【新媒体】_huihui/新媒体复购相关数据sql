@@ -1,0 +1,53 @@
+
+select a.rq  rq --支付时间
+       ,a.original_amount original_amount --商品价格
+       ,a.zidabo_type  zidabo_type --自达播类型
+       ,a.good_name  good_name --商品名称
+       ,a.wfs  wfs  --实付金额
+       ,a.order_id  aorder_id --支付订单id
+       ,a.ramount   ramount   --退款金额
+       ,a.u_user  au_user     --支付用户id
+
+       ,b.u_user  bu_user      --复购表中的用户id
+       ,b.order_id  border_id  --复购表中的订单id
+       ,b.paid_time  paid_time --复购表中的再次下单时间
+       --,b.team_names  team_names  --复购表中的激活渠道
+       --,b.payment_platform  payment_platform  --复购表中的下单支付渠道
+       ,b.business_gmv_attribution  business_gmv_attribution  --复购表中的下单业务GMV归属划分
+       ,b.sub_amount  sub_amount --复购表中的复购金额
+       ,b.status  status--复购表中订单状态，支付成功或退款成功
+
+from 
+(select rq
+,original_amount
+,zidabo_type
+,good_name 
+,wfs
+,order_id
+,ramount
+,u_user
+from 
+tmp.dinghuihui_xmt_online_order_detail
+where substring(rq,1,7)>='2024-01' 
+and wfs>0.5
+group by 1,2,3,4,5,6,7,8) a 
+
+left join 
+(SELECT u_user 
+,order_id
+,paid_time
+,team_names
+,payment_platform
+,business_gmv_attribution
+,sum(nvl(sub_amount,0))-sum(nvl(total_refund_amt,0)) sub_amount 
+from dws.topic_order_detail
+where 
+ u_user is NOT NULL
+and original_amount >= 39.9
+and substring(paid_time,1,7)>='2024-01'
+group by 1,2,3,4,5,6) b 
+on a1.u_user=b.u_user
+and a1.rq<b.paid_time
+and a1.aorder_id<>b.border_id
+
+

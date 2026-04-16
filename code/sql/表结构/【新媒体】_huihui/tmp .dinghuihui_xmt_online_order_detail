@@ -1,0 +1,130 @@
+=====================================================
+--第一段、表头注释
+-- {新媒体业绩表} {tmp}.{dinghuihui_xmt_online_order_detail}
+-- =====================================================
+--
+-- 【表粒度】★必填
+--  一个订单=一条记录（order_id 唯一标识）
+--
+---【业务定位】
+--  仅新媒体订单，是新媒体营收的最权威的数据来源
+--  与全公司订单宽表(dws.topic_order_detail)的区别：
+--   - 本表：仅新媒体业务订单
+--   - 全量表：全公司所有业务订单（电销、app、入校、体验营等）
+--  选表原则：
+--  -新媒体营收分析 → 用本表
+-- 
+--【数据来源】
+--  dws.topic_order_detail 全公司订单宽表
+--  growth_order_thirdparty.thirdpart_general_order 视频号
+--  growth_order_thirdparty.weidian_order 微店
+--  aws.xhs_order 小红书
+--  tmp.dinghuihui_sy_xianxia 线下分销渠道
+--  aws.tiktok_order 抖店
+--  dw.fact_order_detail_refund 退款表（含各子订单的数据）
+--
+-- 【统计口径】
+--  支付口径
+--   -支付GMV = sum(amount)
+--   -退款GMV = sum(ramount)
+--   -退后GMV（也叫实际支付GMV）=  sum(wfs)
+--   -支付订单量 = count(distinct order_id) 
+--   -退款订单量 =  COUNT(DISTINCT CASE WHEN ramount > 0 THEN order_id END)
+--   -退后订单量（也叫实际支付订单量）=count(distinct order_id)-COUNT(DISTINCT CASE WHEN ramount > 0 THEN order_id END)
+--
+--  激活口径
+--   -激活退后GMV（也叫激活实际支付GMV）=  sum(case when u_user is null or u_user in ('unavailable','','null') then wfs end)
+--   -激活退后订单量（也叫实际支付订单量）= count(distinct case when u_user is null or u_user in ('unavailable','','null') then order_id end) 
+--
+--  未激活口径
+--   -激活退后GMV（也叫激活实际支付GMV）=  sum(case when u_user is not null or u_user not in ('unavailable','','null') then wfs end)
+--   -激活退后订单量（也叫实际支付订单量）= count(distinct case when u_user is not null or u_user not in ('unavailable','','null') then order_id end) 
+--
+--  常用关联
+--  调取产品类型，年级，用户类型等
+--  本表.order=dws.topic_order_detail.order_id 
+--  · dws.topic_order_detail一个订单会拆成多条，注意去重
+--  调取用户注册信息
+--  本表.u_user=dw.dim_user.order_id.u_user
+--  · dws.topic_order_detail一个订单会拆成多条，注意去重
+--
+-- 【常用筛选条件】
+--   ★必加条件（任何查询都必须带）
+--  自达播等：
+--   -zidabo_type ='自播' --统计自播
+--   -zidabo_type in （'达播','线下' -,'微店')-统计达播
+--   -zidabo_type ='服务期' --统计服务期
+--   -zidabo_type =小店自卖' --统计小店自卖
+--   -zidabo_type ='线下' --统计线下
+--  支付渠道抖店、视频号等
+--  -payment_platform = ‘小红书’ --统计小红书
+--  -payment_platform = ‘视频号’ --统计视频号
+--  -payment_platform = ‘抖店’ --统计抖店
+--  -payment_platform = ‘微店’ --统计微店
+--
+-- 【注意事项】
+--  ⚠️ 本表佣金相关的字段比较敏感，数据为空
+--  zdaren_id、qudao、ldaren_nicheng、ldaren_id弃用
+--  使用时注意限制时间区间，对应字段rq
+
+
+
+
+=====================================================
+--第二段：DDL 建表语句
+CREATE TABLE tmp.dinghuihui_xmt_online_order_detail (
+  rq STRING,
+  zidabo_type STRING '自达播类型',
+  order_id STRING COMMENT '订单业务id',
+  business_id STRING COMMENT '商户ID',
+  amount STRING COMMENT '支付GMV',
+  payment_platform STRING COMMENT '支付平台',
+  o1daren_id STRING COMMENT '达人id',
+  o1daren_nicheng STRING COMMENT '达人昵称',
+  shop_name STRING COMMENT '店铺',
+  good_sell_kind STRING COMMENT '商品售卖类型',
+  u_user STRING COMMENT '用户ID',
+  province STRING COMMENT '省',
+  city STRING COMMENT '市',
+  area STRING COMMENT '区',
+  sku_group_good_id STRING COMMENT 'sku商品组id',
+  good_name STRING COMMENT '商品名',
+  pad_type STRING COMMENT '平板类型',
+  good_type STRING COMMENT '商品类型(已弃用,推荐使用good_kind_name_level_2)',
+  good_original_amount STRING COMMENT '商品原价',
+  original_amount STRING COMMENT '订单原价',
+  good_kind_name_level_1 STRING COMMENT '商品类目-一级',
+  good_kind_name_level_2 STRING COMMENT '商品类目-二级',
+  good_kind_name_level_3 STRING COMMENT '商品类目-三级',
+  good_kind_id_level_1 STRING COMMENT '商品类目-一级id',
+  good_kind_id_level_2 STRING COMMENT '商品类目-二级id',
+  good_kind_id_level_3 STRING COMMENT '商品类目-三级id',
+  model_type STRING COMMENT '平板型号',
+  yjchengb STRING COMMENT '硬件成本金额',
+  ramount STRING COMMENT '退款GMV',
+  wfs STRING COMMENT '实际支付GMV（又叫退后GMV）',
+  zdaren_id STRING COMMENT '达人id弃用',
+  qudao STRING COMMENT '支付渠道弃用',
+  ldaren_nicheng STRING COMMENT '商务上传达人昵称弃用',
+  ldaren_id STRING COMMENT '商务上传达人id弃用',
+  kecheng_yongjing STRING COMMENT '平板佣金',
+  pinban_yongjing STRING COMMENT '课程佣金',
+  jianlian_shangwu STRING COMMENT '建联商务',
+  fuwu_shangwu  STRING COMMENT '服务商务',
+  hezuo_time STRING COMMENT '达人合作时间',
+  daren_type_waibu STRING COMMENT '达人外部等级',
+  daren_type_neibu STRING COMMENT '达人内部等级',
+  daren_jibie STRING COMMENT '类型',
+  diyu STRING COMMENT '无实质含义',
+  shifou_kouling STRING COMMENT '无实质含义',
+  beiyong1 STRING COMMENT '无实质含义',
+  beiyong2 STRING COMMENT '无实质含义',
+  beiyong3 STRING COMMENT '无实质含义',
+  zuizhong_shangwu STRING COMMENT '无实质含义',
+  diff_time STRING COMMENT '无实质含义',
+  yongjing_jiner STRING COMMENT '无实质含义'
+)
+
+=====================================================
+--第三段、枚举值
+--无枚举值
