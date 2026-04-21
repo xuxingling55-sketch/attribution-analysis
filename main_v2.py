@@ -59,7 +59,7 @@ def main():
         report.add_step("Q3_Location", True, comparison)
         
         # Q3: 自动化下钻
-        auto_drill_down(cursor, args.grade, weeks_int)
+        auto_drill_down(cursor, args.grade, weeks_int, weeks_str)
         
         # 执行基础查询作为基线
         # ... (此处省略部分数据获取代码，保持逻辑简洁)

@@ -41,8 +41,9 @@ def run_global_comparison(cursor, target_grade, weeks_str):
     # 假设返回了比对结果
     return "GLOBAL_SYNC" # 示例结果
 
-def auto_drill_down(cursor, target_grade, weeks_int):
+def auto_drill_down(cursor, target_grade, weeks_int, weeks_str):
     """Q3: 自动化维度穷举扫描 (流量 + 转化率 + GMV)"""
+    # 核心扫描维度
     dimensions = [
         ('user_layer', 'business_user_pay_status_business'),
         ('source', 'clue_source'),
@@ -51,24 +52,70 @@ def auto_drill_down(cursor, target_grade, weeks_int):
     ]
     print(f"  [Q3] 正在对 {len(dimensions)} 个维度执行自动化‘效率+规模’下钻扫描...")
     
-    # 逻辑：对于每个维度，计算：
-    # 1. 流量占比变化 (Volume Share Change)
-    # 2. 转化率变化 (CVR Change) -> 解决“只拆商品不拆渠道”的问题
-    # 3. GMV 贡献度 (GMV Contribution)
+    # 针对不同维度的专项深度下钻
+    # 1. 商品维度专项
+    drill_down_product(cursor, target_grade, weeks_int)
     
-    for label, col in dimensions:
-        sql = f"""
-        SELECT 
-            {col},
-            COUNT(*) as traffic,
-            SUM(CASE WHEN is_paid=1 THEN 1 ELSE 0 END) as paid_count,
-            SUM(pay_amount) as gmv
-        FROM dws.topic_user_active_detail_day
-        WHERE mid_grade = '{target_grade}' AND day IN ({weeks_int[0][1]}, {weeks_int[1][1]})
-        GROUP BY 1
-        """
-        # ... 逻辑处理：对比两周差异，识别 CVR 剧烈波动的维度 ...
+    # 2. 渠道维度专项 (APP & 电销)
+    drill_down_channel_app(cursor, weeks_str)
+    drill_down_channel_telesale(cursor, weeks_str)
+    
     return dimensions
+
+def drill_down_product(cursor, target_segment, weeks_int):
+    """
+    [专项归因] 商品维度归因逻辑
+    路径：学段 -> 具体商品
+    """
+    print(f"  [Q3-Product] 正在分析 {target_segment} 学段下的具体商品异动...")
+    sql = f"""
+    SELECT 
+        product_name,
+        SUM(CASE WHEN day = {weeks_int[1][1]} THEN pay_amount ELSE 0 END) as base_gmv,
+        SUM(CASE WHEN day = {weeks_int[0][1]} THEN pay_amount ELSE 0 END) as current_gmv
+    FROM dws.topic_order_detail
+    WHERE mid_grade_segment = '{target_segment}' 
+      AND day IN ({weeks_int[0][1]}, {weeks_int[1][1]})
+    GROUP BY 1
+    HAVING current_gmv - base_gmv != 0
+    ORDER BY (current_gmv - base_gmv) ASC
+    """
+    # 实际执行并返回异动 TOP 商品
+    return "Product_DrillDown_Result"
+
+def drill_down_channel_app(cursor, weeks_str):
+    """
+    [专项归因] APP 渠道归因逻辑
+    路径：曝光 -> 点击 -> 试听 -> 支付成功 (漏斗分析)
+    """
+    print("  [Q3-Channel] 正在分析 APP 渠道漏斗转化断点...")
+    sql = f"""
+    SELECT 
+        event_name, -- 曝光, 点击, 试听, 支付
+        COUNT(DISTINCT u_user) as user_cnt
+    FROM dws.topic_user_behavior_detail -- 假设存在行为明细表
+    WHERE channel = 'APP' 
+      AND day BETWEEN '{weeks_str[1][1]}' AND '{weeks_str[0][2]}'
+    GROUP BY 1
+    """
+    return "APP_Funnel_Breakpoint"
+
+def drill_down_channel_telesale(cursor, weeks_str):
+    """
+    [专项归因] 电销渠道归因逻辑
+    路径：销售团队 (Sales Team)
+    """
+    print("  [Q3-Channel] 正在分析电销销售团队绩效异动...")
+    sql = f"""
+    SELECT 
+        sales_team,
+        COUNT(DISTINCT clue_id) as clue_cnt,
+        SUM(order_amount) as gmv
+    FROM aws.crm_order_info
+    WHERE pay_time BETWEEN '{weeks_str[1][1]}' AND '{weeks_str[0][2]}'
+    GROUP BY 1
+    """
+    return "Telesale_Team_Result"
 
 def verify_hypotheses_v2(cursor, grade, weeks_str):
     """Q4: 强化版的六大假设验证"""
