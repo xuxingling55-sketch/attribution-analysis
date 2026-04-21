@@ -25,3 +25,4 @@ __pycache__/
 config.yaml
 reports/*.md
 venv/
+docs/sop_v2_flowchart.png
