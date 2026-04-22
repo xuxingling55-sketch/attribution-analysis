@@ -37,7 +37,7 @@ lines = []
 
 # ── SVG 头 + defs ─────────────────────────────────────────
 lines.append(
-    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} 4300" '
+    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} 4800" '
     f'font-family="PingFang SC, Heiti SC, STHeiti, Microsoft YaHei, sans-serif">'
 )
 lines.append('''<defs>
@@ -45,7 +45,7 @@ lines.append('''<defs>
     <polygon points="0 0,12 4.5,0 9" fill="#666"/>
   </marker>
 </defs>''')
-lines.append(f'<rect width="{W}" height="4300" fill="#F0F2F5"/>')
+lines.append(f'<rect width="{W}" height="4800" fill="#F0F2F5"/>')
 
 
 # ══════════════════════════════════
@@ -246,114 +246,196 @@ lines.append(arrow(mid_R, fork_y, mid_R, fork_y + 24))
 # ── 商品维度（左）──
 y2 = fork_y + 26
 half_w = W // 2 - PAD - 20
+BOX_H = 1040  # 两侧 box 统一高度
 
-lines.append(rect(PAD, y2, half_w, 530, 'white', stroke='#805AD5', sw=2.5))
+lines.append(rect(PAD, y2, half_w, BOX_H, 'white', stroke='#805AD5', sw=2.5))
 lines.append(rect(PAD, y2, half_w, 48, '#805AD5', rx=10))
 lines.append(txt(PAD + half_w // 2, y2 + 31, '📦  商品维度归因',
                  size=26, fill='white', anchor='middle', weight='bold'))
 
-lines.append(txt(PAD + 28, y2 + 80, '第一级：归因至学段', size=22, fill='#553C9A', weight='bold'))
-for i, t in enumerate(['字段: stage_name（小学 / 初中 / 高中）',
-                        '作用: 确认哪个学段贡献了最大异动']):
-    lines.append(txt(PAD + 28, y2 + 112 + i * 30, t, size=19, fill='#444'))
+# ── Step 1：定位学段 ──
+step_y = y2 + 60
+lines.append(rect(PAD + 14, step_y, half_w - 28, 32, '#EDE9FE', rx=6))
+lines.append(txt(PAD + 28, step_y + 21,
+                 'Step 1  定位学段 — 哪个学段跌了？',
+                 size=20, fill='#553C9A', weight='bold'))
+for i, t in enumerate([
+    '字段: stage_name（小学 / 初中 / 高中）',
+    'SQL: GROUP BY stage_name，对比两周 GMV',
+    '判断: 找出绝对跌幅 TOP 学段，计算贡献占比',
+]):
+    lines.append(txt(PAD + 36, step_y + 44 + i * 28, t, size=18, fill='#444'))
 
-lines.append(seg(PAD + 28, y2 + 176, PAD + half_w - 28, y2 + 176, '#805AD5', sw=1))
+lines.append(arrow(PAD + half_w // 2, step_y + 128, PAD + half_w // 2, step_y + 152))
 
-lines.append(txt(PAD + 28, y2 + 200, '第二级：归因至具体异动 SKU', size=22, fill='#553C9A', weight='bold'))
-for i, t in enumerate(['字段: good_name + mid_grade',
-                        '方法: 对比两周各 SKU GMV，计算贡献度',
-                        '公式: Contribution = ΔSKU_GMV / ΔTotal_GMV']):
-    lines.append(txt(PAD + 28, y2 + 232 + i * 30, t, size=19, fill='#444'))
+# ── Step 2：定位 SKU ──
+step_y = step_y + 154
+lines.append(rect(PAD + 14, step_y, half_w - 28, 32, '#EDE9FE', rx=6))
+lines.append(txt(PAD + 28, step_y + 21,
+                 'Step 2  定位 SKU — 哪个商品跌了？',
+                 size=20, fill='#553C9A', weight='bold'))
+for i, t in enumerate([
+    '字段: good_name + mid_grade',
+    'SQL: GROUP BY good_name, mid_grade，计算 ΔGMV',
+    '公式: 贡献度 = ΔSKU_GMV / ΔTotal_GMV × 100%',
+    '输出: TOP 5 下跌 SKU 及各自贡献度',
+]):
+    lines.append(txt(PAD + 36, step_y + 44 + i * 28, t, size=18, fill='#444'))
 
-# TOP SKU 表  （列位置用绝对 x，给名称列足够空间）
-th3_y = y2 + 332
+# TOP SKU 数据表
+th3_y = step_y + 166
 SKU_NAME_X  = PAD + 28
-SKU_DELTA_X = PAD + 28 + 620   # 变化额列
-SKU_PCT_X   = PAD + 28 + 800   # 变化率列
+SKU_DELTA_X = PAD + 580
+SKU_PCT_X   = PAD + 760
 lines.append(rect(PAD + 14, th3_y, half_w - 28, 30, '#F3E8FF'))
-lines.append(txt(SKU_NAME_X,  th3_y + 20, 'TOP 异动商品（真实数据）', size=18, fill='#553C9A', weight='bold'))
-lines.append(txt(SKU_DELTA_X, th3_y + 20, '变化额',                   size=18, fill='#553C9A', weight='bold'))
-lines.append(txt(SKU_PCT_X,   th3_y + 20, '变化率',                   size=18, fill='#553C9A', weight='bold'))
-
+lines.append(txt(SKU_NAME_X,  th3_y + 20, '商品名（本案 TOP 5）', size=18, fill='#553C9A', weight='bold'))
+lines.append(txt(SKU_DELTA_X, th3_y + 20, 'ΔGMV',               size=18, fill='#553C9A', weight='bold'))
+lines.append(txt(SKU_PCT_X,   th3_y + 20, '变化率',              size=18, fill='#553C9A', weight='bold'))
 sku_rows = [
-    ('[七升八]初中规划提分课（七年级）', '-39,060', '-7.9%'),
+    ('[七升八]初中规划提分课（七年级）', '-39,060',  '-7.9%'),
     ('[小升初]初中规划提分课（六年级）', '-31,347', '-24.5%'),
     ('[四升五]小初全面进阶课（四年级）', '-28,666', '-46.3%'),
     ('[新高二]高中规划提分课（九年级）', '-26,488', '-68.3%'),
-    ('初中数学同步课12个月（七年级）',    '-21,414', '-24.6%'),
+    ('初中数学同步课12个月（七年级）',   '-21,414', '-24.6%'),
 ]
 for ri, (nm, d, p) in enumerate(sku_rows):
-    ry3 = th3_y + 30 + ri * 32
+    ry3 = th3_y + 30 + ri * 30
     if ri % 2 == 0:
-        lines.append(rect(PAD + 14, ry3, half_w - 28, 32, '#FDF8FF'))
-    lines.append(txt(SKU_NAME_X,  ry3 + 22, nm, size=17, fill='#C53030'))
-    lines.append(txt(SKU_DELTA_X, ry3 + 22, d,  size=17, fill='#C53030'))
-    lines.append(txt(SKU_PCT_X,   ry3 + 22, p,  size=17, fill='#C53030'))
+        lines.append(rect(PAD + 14, ry3, half_w - 28, 30, '#FDF8FF'))
+    lines.append(txt(SKU_NAME_X,  ry3 + 21, nm, size=17, fill='#C53030'))
+    lines.append(txt(SKU_DELTA_X, ry3 + 21, d,  size=17, fill='#C53030'))
+    lines.append(txt(SKU_PCT_X,   ry3 + 21, p,  size=17, fill='#C53030', weight='bold'))
 
-lines.append(txt(PAD + 28, y2 + 510,
-                 '→ 共性：均为[升学规划]课型，4月初签约高峰后自然退潮',
-                 size=18, fill='#553C9A', weight='bold'))
+lines.append(arrow(PAD + half_w // 2, th3_y + 182, PAD + half_w // 2, th3_y + 206))
+
+# ── Step 3：判断原因类型 ──
+step3_y = th3_y + 208
+lines.append(rect(PAD + 14, step3_y, half_w - 28, 32, '#EDE9FE', rx=6))
+lines.append(txt(PAD + 28, step3_y + 21,
+                 'Step 3  判断下跌原因类型',
+                 size=20, fill='#553C9A', weight='bold'))
+
+reason_items = [
+    ('季节性退潮', '对比去年同期同 SKU，若同样下跌 → 自然周期', '#553C9A'),
+    ('商品下架/减曝光', '查看 APP 端商品曝光量（show 事件）是否骤降', '#744210'),
+    ('价格调整', '对比两周 sub_amount 均值，确认是否有调价', '#276749'),
+    ('内容质量问题', '查看课程完课率、差评率是否异常上升', '#C53030'),
+]
+for i, (typ, desc, col) in enumerate(reason_items):
+    iy = step3_y + 44 + i * 46
+    lines.append(rect(PAD + 28, iy, 160, 34, col, rx=5))
+    lines.append(txt(PAD + 28 + 80, iy + 22, typ, size=16, fill='white', anchor='middle', weight='bold'))
+    lines.append(txt(PAD + 200, iy + 22, desc, size=17, fill='#444'))
+
+# 结论
+concl_y = step3_y + 236
+lines.append(rect(PAD + 14, concl_y, half_w - 28, 36, '#553C9A', rx=6))
+lines.append(txt(PAD + half_w // 2, concl_y + 23,
+                 '本案结论：[升学规划]课型季节性退潮，非产品/价格问题',
+                 size=18, fill='white', anchor='middle', weight='bold'))
 
 # ── 渠道维度（右）──
 rx2 = W // 2 + 20
-lines.append(rect(rx2, y2, half_w, 530, 'white', stroke='#2B6CB0', sw=2.5))
+lines.append(rect(rx2, y2, half_w, BOX_H, 'white', stroke='#2B6CB0', sw=2.5))
 lines.append(rect(rx2, y2, half_w, 48, '#2B6CB0', rx=10))
 lines.append(txt(rx2 + half_w // 2, y2 + 31, '📡  渠道维度归因',
                  size=26, fill='white', anchor='middle', weight='bold'))
 
-lines.append(txt(rx2 + 28, y2 + 80, '▶  APP 渠道：漏斗转化分析', size=22, fill='#2C5282', weight='bold'))
-for i, t in enumerate([
-    '路径：曝光 → 点击 → 试听 → 支付成功',
-    '方法：逐级计算转化率，定位断点环节',
-    '表: dws.topic_user_behavior_detail',
-    '字段: event_name (show/click/listen/pay), u_user',
-]):
-    lines.append(txt(rx2 + 28, y2 + 112 + i * 30, t, size=19, fill='#444'))
+# ── APP 渠道 ──
+app_y = y2 + 60
+lines.append(rect(rx2 + 14, app_y, half_w - 28, 32, '#DBEAFE', rx=6))
+lines.append(txt(rx2 + 28, app_y + 21,
+                 '▶ APP 渠道：四层漏斗逐级下钻',
+                 size=20, fill='#1E40AF', weight='bold'))
 
-lines.append(rect(rx2 + 14, y2 + 244, half_w - 28, 64, '#EBF8FF', rx=6))
-lines.append(txt(rx2 + 28, y2 + 264, '正常转化参考：曝光→点击 ~35%   点击→试听 ~55%', size=18, fill='#2C5282'))
-lines.append(txt(rx2 + 28, y2 + 290,
-                 '⚠️ 重点关注：试听→支付 若骤降 → 定位为【支付断点】',
-                 size=18, fill='#C53030'))
+# 漏斗四步
+funnel_steps = [
+    ('① 曝光量', 'event=show，统计 UV', '基准层，量级骤降 → 流量入口问题'),
+    ('② 点击率', '点击UV / 曝光UV，参考值 ~35%', '点击率下滑 → 商品卡片吸引力不足'),
+    ('③ 试听率', '试听UV / 点击UV，参考值 ~55%', '试听率下滑 → 详情页/课程质量问题'),
+    ('④ 支付率', '支付UV / 试听UV，重点关注', '支付率下滑 → 定价/活动/促销断档'),
+]
+for i, (label, sql_hint, action) in enumerate(funnel_steps):
+    fy = app_y + 44 + i * 74
+    # 步骤色块
+    step_col = ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA'][i]
+    lines.append(rect(rx2 + 28, fy, 130, 30, step_col, rx=5))
+    lines.append(txt(rx2 + 28 + 65, fy + 20, label, size=17, fill='white', anchor='middle', weight='bold'))
+    lines.append(txt(rx2 + 170, fy + 20, sql_hint, size=17, fill='#1E40AF'))
+    lines.append(txt(rx2 + 36, fy + 50, '→ ' + action, size=16, fill='#555'))
+    # 向下箭头（最后一个不画）
+    if i < 3:
+        lines.append(seg(rx2 + 93, fy + 30, rx2 + 93, fy + 46, '#3B82F6', sw=1.5))
+        lines.append(txt(rx2 + 93, fy + 44, '▼', size=14, fill='#3B82F6', anchor='middle'))
 
-lines.append(seg(rx2 + 14, y2 + 322, rx2 + half_w - 14, y2 + 322, '#BEE3F8', sw=1.5))
+# 平台拆分
+plat_y = app_y + 44 + 4 * 74
+lines.append(rect(rx2 + 14, plat_y, half_w - 28, 50, '#EBF8FF', rx=6))
+lines.append(txt(rx2 + 28, plat_y + 18, '补充：iOS vs Android 分平台对比', size=17, fill='#1E40AF', weight='bold'))
+lines.append(txt(rx2 + 28, plat_y + 40, '若某平台 CVR 骤降 → 排查该平台版本更新/功能异常', size=16, fill='#555'))
 
-lines.append(txt(rx2 + 28, y2 + 348, '▶  电销渠道：归因至销售团队', size=22, fill='#2C5282', weight='bold'))
-for i, t in enumerate([
-    '维度: business_gmv_attribution（团队标签）',
-    '表: aws.crm_order_info | 字段: stage, pay_time, amount',
-]):
-    lines.append(txt(rx2 + 28, y2 + 378 + i * 28, t, size=19, fill='#444'))
+lines.append(seg(rx2 + 14, plat_y + 58, rx2 + half_w - 14, plat_y + 58, '#BEE3F8', sw=1.5))
 
-# 电销数据  （列位置用绝对 x）
-th4_y = y2 + 430
+# ── 电销渠道 ──
+crm_y = plat_y + 70
+lines.append(rect(rx2 + 14, crm_y, half_w - 28, 32, '#DBEAFE', rx=6))
+lines.append(txt(rx2 + 28, crm_y + 21,
+                 '▶ 电销渠道：三步归因法',
+                 size=20, fill='#1E40AF', weight='bold'))
+
+crm_steps = [
+    ('Step 1  按团队拆 GMV',
+     '字段: business_gmv_attribution',
+     '定位哪个团队贡献了下跌'),
+    ('Step 2  拆线索量 vs 转化率',
+     '线索量: aws.clue_info | 转化率: 成单/线索',
+     '线索少 → 获客问题；线索多但转化低 → 销售/商品问题'),
+    ('Step 3  对比团队人效',
+     '人均 GMV = 团队GMV / 在岗人数',
+     '人效下滑 → 排查话术/激励/培训'),
+]
+CRM_STEP_H = 84
+for i, (title, sql_h, action) in enumerate(crm_steps):
+    cy = crm_y + 44 + i * (CRM_STEP_H + 8)
+    lines.append(rect(rx2 + 28, cy, half_w - 56, CRM_STEP_H, '#F0F7FF', rx=6, stroke='#BEE3F8', sw=1))
+    lines.append(txt(rx2 + 44, cy + 22, title,  size=18, fill='#1E40AF', weight='bold'))
+    lines.append(txt(rx2 + 44, cy + 46, sql_h,  size=16, fill='#666'))
+    lines.append(txt(rx2 + 44, cy + 68, '→ ' + action, size=16, fill='#C05621'))
+
+# 电销本案数据
+th4_y = crm_y + 44 + 3 * (CRM_STEP_H + 8) + 12
 CRM_NAME_X  = rx2 + 28
-CRM_DELTA_X = rx2 + 400
-CRM_PCT_X   = rx2 + 600
-lines.append(rect(rx2 + 14, th4_y, half_w - 28, 30, '#EBF8FF'))
-lines.append(txt(CRM_NAME_X,  th4_y + 20, '本案真实数据',  size=18, fill='#2C5282', weight='bold'))
-lines.append(txt(CRM_DELTA_X, th4_y + 20, '变化额',        size=18, fill='#2C5282', weight='bold'))
-lines.append(txt(CRM_PCT_X,   th4_y + 20, '变化率',        size=18, fill='#2C5282', weight='bold'))
-
+CRM_DELTA_X = rx2 + 430
+CRM_PCT_X   = rx2 + 620
+lines.append(rect(rx2 + 14, th4_y, half_w - 28, 30, '#DBEAFE'))
+lines.append(txt(CRM_NAME_X,  th4_y + 20, '本案数据（初中电销）', size=17, fill='#1E40AF', weight='bold'))
+lines.append(txt(CRM_DELTA_X, th4_y + 20, 'ΔGMV',               size=17, fill='#1E40AF', weight='bold'))
+lines.append(txt(CRM_PCT_X,   th4_y + 20, '变化率',              size=17, fill='#1E40AF', weight='bold'))
 crm_rows = [
-    ('初中-商业化',     '-108,459', '-14.3%', '#C53030'),
-    ('初中-商业化电商', '-31,424',  '-33.4%', '#C53030'),
-    ('初中-电销团队',   '+91,252',  '+3.5% ✅', '#276749'),
+    ('商业化渠道',     '-108,459', '-14.3% 🔴', '#C53030'),
+    ('商业化电商',      '-31,424',  '-33.4% 🔴', '#C53030'),
+    ('电销团队',        '+91,252',   '+3.5% ✅', '#276749'),
 ]
 for ri, (nm, d, p, col) in enumerate(crm_rows):
     ry4 = th4_y + 30 + ri * 30
-    bg4 = '#FFF5F5' if col == '#C53030' else '#F0FFF4'
-    lines.append(rect(rx2 + 14, ry4, half_w - 28, 30, bg4))
-    lines.append(txt(CRM_NAME_X,  ry4 + 20, nm, size=18, fill=col))
-    lines.append(txt(CRM_DELTA_X, ry4 + 20, d,  size=18, fill=col))
-    lines.append(txt(CRM_PCT_X,   ry4 + 20, p,  size=18, fill=col, weight='bold'))
+    lines.append(rect(rx2 + 14, ry4, half_w - 28, 30, '#FFF5F5' if col == '#C53030' else '#F0FFF4'))
+    lines.append(txt(CRM_NAME_X,  ry4 + 20, nm, size=17, fill=col))
+    lines.append(txt(CRM_DELTA_X, ry4 + 20, d,  size=17, fill=col))
+    lines.append(txt(CRM_PCT_X,   ry4 + 20, p,  size=17, fill=col, weight='bold'))
+
+# 结论
+crm_concl_y = th4_y + 102
+lines.append(rect(rx2 + 14, crm_concl_y, half_w - 28, 36, '#1E40AF', rx=6))
+lines.append(txt(rx2 + half_w // 2, crm_concl_y + 23,
+                 '本案结论：电销团队正常，商业化渠道/电商渠道投放效率下滑',
+                 size=17, fill='white', anchor='middle', weight='bold'))
 
 # 合并箭头
-merge_y = y2 + 530 + 20
-lines.append(seg(mid_L,  y2 + 530, mid_L,  merge_y))
-lines.append(seg(mid_R,  y2 + 530, mid_R,  merge_y))
-lines.append(seg(mid_L,  merge_y,  mid_R,  merge_y))
-lines.append(arrow(CX,  merge_y, CX, merge_y + 36))
+merge_y = y2 + BOX_H + 20
+lines.append(seg(mid_L,  y2 + BOX_H, mid_L,  merge_y))
+lines.append(seg(mid_R,  y2 + BOX_H, mid_R,  merge_y))
+lines.append(seg(mid_L,  merge_y,    mid_R,  merge_y))
+lines.append(arrow(CX,   merge_y,    CX,     merge_y + 36))
 
 
 # ══════════════════════════════════
