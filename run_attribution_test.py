@@ -28,6 +28,13 @@ LOCAL_PORT = 19998
 CURR_START = '2026-04-13'; CURR_END = '2026-04-20'
 BASE_START = '2026-04-06'; BASE_END = '2026-04-13'
 
+# ── Q2-C 触发阈值 ──────────────────────────────────
+# 不固定，使用近四周同星期历史波动范围（std）动态判断
+# 可在每次归因前由业务方确认调整
+# 格式：(lower_pct, upper_pct)，如 (-5.0, 5.0) 表示历史正常波动 ±5%
+# 设为 None 则跳过自动触发判断，强制进入 Q3
+ANOMALY_THRESHOLD = (-4.0, 4.0)   # 单位：%，与业务方对齐后修改
+
 # ── SSH 隧道 ──────────────────────────────────────
 def build_tunnel():
     client = paramiko.SSHClient()
@@ -193,10 +200,16 @@ print(f'\n  GMV    ：{base_gmv:>12,.0f} → {curr_gmv:>12,.0f}  {fmt_pct(curr_g
 print(f'  付费用户：{base_user:>12,} → {curr_user:>12,}  {fmt_pct(curr_user, base_user)}')
 print(f'  AOV    ：{base_aov:>12,.1f} → {curr_aov:>12,.1f}  {fmt_pct(curr_aov, base_aov)}')
 
-if abs(gmv_pct) < 4:
-    print(f'\n  ⚠️  GMV 变化 {gmv_pct:+.1f}%，未达 4% 触发阈值，终止归因')
-    sys.exit(0)
-print(f'\n  ✅ Q2 通过，GMV {gmv_pct:+.1f}%，进入 Q3 下钻')
+if ANOMALY_THRESHOLD is None:
+    print(f'\n  ℹ️  ANOMALY_THRESHOLD=None，跳过自动触发判断，强制进入 Q3')
+else:
+    lo, hi = ANOMALY_THRESHOLD
+    if lo <= gmv_pct <= hi:
+        print(f'\n  ⚠️  GMV 变化 {gmv_pct:+.1f}%，在业务方确认的正常波动范围 [{lo:+.1f}%, {hi:+.1f}%] 内')
+        print(f'  → 不满足归因条件，记录后关闭')
+        print(f'  → [关闭] GMV {CURR_START}周：变化 {gmv_pct:+.1f}%，历史正常范围 [{lo:+.1f}%, {hi:+.1f}%]，无需归因')
+        sys.exit(0)
+    print(f'\n  ✅ Q2 通过，GMV {gmv_pct:+.1f}%，超出正常范围 [{lo:+.1f}%, {hi:+.1f}%]，进入 Q3 下钻')
 
 
 # ══════════════════════════════════════════════════
@@ -259,7 +272,7 @@ df_chan_order['delta']   = df_chan_order.curr_gmv - df_chan_order.base_gmv
 df_chan_order['pct']     = (df_chan_order.curr_gmv - df_chan_order.base_gmv) / df_chan_order.base_gmv * 100
 df_chan_order['contrib'] = df_chan_order.delta / total_delta * 100
 df_chan_order['source']  = 'order'
-print('\n[订单表渠道]')
+print('\n[订单表渠道 · 口径: topic_order_detail / 贡献度基于全量 GMV delta]')
 print(df_chan_order[['channel','base_gmv','curr_gmv','delta','pct','contrib']].to_string(index=False))
 
 # 电销表渠道（P99 过滤）
@@ -282,10 +295,13 @@ ORDER BY (curr_gmv - base_gmv) ASC
 df_chan_crm = q(cur, sql_chan_crm, '电销表渠道（P99过滤）')
 df_chan_crm['delta']   = df_chan_crm.curr_gmv - df_chan_crm.base_gmv
 df_chan_crm['pct']     = (df_chan_crm.curr_gmv - df_chan_crm.base_gmv) / df_chan_crm.base_gmv * 100
-df_chan_crm['contrib'] = df_chan_crm.delta / total_delta * 100
+# 电销表 contrib 基于电销内部 delta，不与订单表混用，避免口径歧义
+crm_total_delta = df_chan_crm['delta'].sum()
+df_chan_crm['contrib_crm'] = df_chan_crm.delta / crm_total_delta * 100 if crm_total_delta != 0 else float('nan')
 df_chan_crm['source']  = 'crm'
-print('\n[电销表渠道]')
-print(df_chan_crm[['channel','base_gmv','curr_gmv','delta','pct','contrib']].to_string(index=False))
+print(f'\n[电销表渠道 · 口径: crm_order_info / P99={p99_val:,.0f} / 贡献度基于电销内部 delta，勿与订单表直接比较]')
+print(df_chan_crm[['channel','base_gmv','curr_gmv','delta','pct','contrib_crm']].to_string(index=False))
+print(f'  ⚠️  电销表与订单表口径不同（表、日期字段、金额字段均不同），贡献度不可跨表加总')
 
 top_channel = df_chan_order[df_chan_order.delta < 0].head(2)['channel'].tolist()
 print(f'\n  TOP 下跌渠道（订单表）：{top_channel}')
@@ -434,9 +450,15 @@ print(f"""
 for _, r in df_stage[df_stage.delta < 0].iterrows():
     print(f"  {r.stage_name:8s}  Δ{r.delta:+,.0f}  {r.pct:+.1f}%  贡献{r.contrib:.1f}%")
 
-print('\n【Q3-B 渠道贡献（订单表）】')
+print('\n【Q3-B 渠道贡献（订单表，贡献度基于全量 GMV delta）】')
 for _, r in df_chan_order[df_chan_order.delta < 0].iterrows():
     print(f"  {str(r.channel):20s}  Δ{r.delta:+,.0f}  {r.pct:+.1f}%  贡献{r.contrib:.1f}%")
+
+print('\n【Q3-B 电销渠道（crm 表，贡献度仅在电销内部可比，⚠️ 不与上表叠加）】')
+for _, r in df_chan_crm.iterrows():
+    contrib_str = f"{r.contrib_crm:.1f}%" if not pd.isna(r.contrib_crm) else 'N/A'
+    arrow = '↑' if r.delta > 0 else '↓'
+    print(f"  {str(r.channel):20s}  Δ{r.delta:+,.0f}  {r.pct:+.1f}%  电销内贡献{contrib_str} {arrow}")
 
 print('\n【Q3-C 学段×渠道 TOP 跌点】')
 for stage, channel, delta, pct_v, contrib in top_combo:
