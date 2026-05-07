@@ -21,6 +21,11 @@ def rect(x, y, w, h, fill, rx=10, stroke=None, sw=2, opacity=1):
 
 
 def txt(x, y, content, size=22, fill='#333', anchor='start', weight='normal'):
+    # XML 特殊字符转义，防止 SVG 解析错误
+    content = (str(content)
+               .replace('&', '&amp;')
+               .replace('<', '&lt;')
+               .replace('>', '&gt;'))
     return (f'<text x="{x}" y="{y}" text-anchor="{anchor}" fill="{fill}" '
             f'font-size="{size}" font-weight="{weight}">{content}</text>')
 
@@ -37,9 +42,10 @@ def seg(x1, y1, x2, y2, color='#999', sw=2):
 
 lines = []
 
-TOTAL_H = 6400
+# viewBox 和背景 rect 用占位符，生成完成后替换为实际高度
+PLACEHOLDER = '__TOTAL_H__'
 lines.append(
-    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {TOTAL_H}" '
+    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {PLACEHOLDER}" '
     f'font-family="PingFang SC, Heiti SC, STHeiti, Microsoft YaHei, sans-serif">'
 )
 lines.append('''<defs>
@@ -47,7 +53,7 @@ lines.append('''<defs>
     <polygon points="0 0,12 4.5,0 9" fill="#666"/>
   </marker>
 </defs>''')
-lines.append(f'<rect width="{W}" height="{TOTAL_H}" fill="#F0F2F5"/>')
+lines.append(f'<rect width="{W}" height="{PLACEHOLDER}" fill="#F0F2F5"/>')
 
 
 # ══════════════════════════════════
@@ -712,7 +718,8 @@ lines.append(txt(CX, y + 258,
 total_h = y + 280
 lines.append('</svg>')
 
-svg_content = '\n'.join(lines)
+# 用实际高度替换占位符
+svg_content = '\n'.join(lines).replace(PLACEHOLDER, str(total_h))
 out_path = '/Users/hilda/attribution-analysis/docs/sop_v2_flowchart.svg'
 with open(out_path, 'w', encoding='utf-8') as f:
     f.write(svg_content)
