@@ -1,8 +1,8 @@
 """
-归因分析 SOP v2 框架图 —— 重构版（2026-05-06）
-Q1: 阈值改为 28天 μ±σ 统计判定 + 自动剔除大促离群天
+归因分析 SOP v2 框架图 —— 重构版（2026-05-07）
+Q1: 对比基准按场景选择（环比/同比/近四周同星期均值）+ 与业务方校准异动标准
 Q2: 动态表策略（按分析指标决定查哪张表）
-Q3: 4维并行下钻（学段/渠道/平台/用户身份）
+Q3: 全量vs局部判断 → 多维对比（年级×渠道/用户分层/公私域/渠道间） → 专项深挖
 """
 
 W = 2400
@@ -68,66 +68,75 @@ y = 140
 lines.append(rect(PAD + 120, y, W - PAD * 2 - 240, 72, '#2B6CB0', rx=12))
 lines.append(txt(CX, y + 32, 'Q1  异动精确化 · Anomaly Definition',
                  size=30, fill='white', anchor='middle', weight='bold'))
-lines.append(txt(CX, y + 60, '明确指标 / 时间周期 / 异动幅度，用统计方法判定是否真实异常',
+lines.append(txt(CX, y + 60, '明确指标 / 对比基准 / 与业务方校准异动标准',
                  size=20, fill='#BEE3F8', anchor='middle'))
 
 y = 230
-BH1 = 390
+BH1 = 410
 lines.append(rect(PAD, y, W - PAD * 2, BH1, 'white', stroke='#BEE3F8', sw=2))
 
-# ── 左列：输入规范 ──
 col_w = (W - PAD * 2 - 60) // 3
 col_x = [PAD + 24, PAD + 24 + col_w + 18, PAD + 24 + (col_w + 18) * 2]
 
-lines.append(txt(col_x[0], y + 38, '输入规范', size=22, fill='#2B6CB0', weight='bold'))
-for i, t in enumerate([
-    '· 指标：GMV / 付费人数 / 线索量 / 转化率 / ARPU',
-    '· 周期：Current 周 vs Baseline 周（默认环比上周）',
-    '· 参考窗口：过去 28 天历史数据',
-    '· 节假日周期可选同比，需标注',
-]):
-    lines.append(txt(col_x[0], y + 72 + i * 36, t, size=19, fill='#444'))
+# ── 左列：对比基准选择 ──
+lines.append(txt(col_x[0], y + 38, '对比基准（按场景选择，不固定）', size=22, fill='#2B6CB0', weight='bold'))
+lines.append(rect(col_x[0], y + 56, col_w - 12, 240, '#EBF8FF', rx=8))
 
-# ── 中列：统计阈值判定 ──
-lines.append(txt(col_x[1], y + 38, '统计判定阈值（μ ± σ）', size=22, fill='#2B6CB0', weight='bold'))
+basis_rows = [
+    ('#1D4ED8', '近四周同星期均值', '日常监控'),
+    ('#0369A1', '同比去年同周',     '强季节性指标'),
+    ('#0284C7', '环比上周',         '紧急快速排查'),
+    ('#0EA5E9', '去促基线',         '大促后复盘'),
+]
+for i, (bc, label, scene) in enumerate(basis_rows):
+    by = y + 70 + i * 52
+    lines.append(rect(col_x[0] + 12, by, 160, 28, bc, rx=5))
+    lines.append(txt(col_x[0] + 92, by + 19, label, size=16, fill='white', anchor='middle', weight='bold'))
+    lines.append(txt(col_x[0] + 185, by + 19, f'→ {scene}', size=17, fill='#2B6CB0'))
 
-# 算法说明框
-lines.append(rect(col_x[1], y + 66, col_w - 12, 180, '#EBF8FF', rx=8))
-lines.append(txt(col_x[1] + 16, y + 90,  'Step 1  取过去 28 天每日指标值', size=18, fill='#1A365D', weight='bold'))
-lines.append(txt(col_x[1] + 16, y + 116, 'Step 2  自动剔除离群天（|x - μ| > 2σ 的天）', size=18, fill='#444'))
-lines.append(txt(col_x[1] + 16, y + 138, '        → 剔除大促/节假日污染，迭代一次', size=17, fill='#666'))
-lines.append(txt(col_x[1] + 16, y + 162, 'Step 3  用剩余天重新计算 μ 和 σ', size=18, fill='#444'))
-lines.append(txt(col_x[1] + 16, y + 186, 'Step 4  当前周日均代入判定：', size=18, fill='#444'))
-lines.append(txt(col_x[1] + 16, y + 210, '        |当前周日均 - μ| > 2σ  →  轻度异常', size=18, fill='#D69E2E', weight='bold'))
-lines.append(txt(col_x[1] + 16, y + 232, '        |当前周日均 - μ| > 3σ  →  严重异常', size=18, fill='#C53030', weight='bold'))
+lines.append(txt(col_x[0] + 12, y + 314,
+                 '⚠️ 选定基准后不可中途更换', size=17, fill='#C05621', weight='bold'))
+lines.append(txt(col_x[0] + 12, y + 340,
+                 '若发现基准选错（如基线含大促）', size=17, fill='#555'))
+lines.append(txt(col_x[0] + 12, y + 362,
+                 '→ 回 Q1 重选，不在 Q3 中修正', size=17, fill='#555'))
 
-# 说明
-for i, t in enumerate([
-    '· σ 用日数据估计（28个点，样本充足）',
-    '· 判定用周日均（平滑单日噪音）',
-    '· 自动剔除大促天，无需维护日历',
-]):
-    lines.append(txt(col_x[1] + 16, y + 262 + i * 32, t, size=18, fill='#555'))
+# ── 中列：异动准确性校准 ──
+lines.append(txt(col_x[1], y + 38, '异动准确性校准（归因前必须对齐）', size=22, fill='#2B6CB0', weight='bold'))
+lines.append(rect(col_x[1], y + 56, col_w - 12, 240, '#EBF8FF', rx=8))
+
+lines.append(txt(col_x[1] + 16, y + 80,  '① 多大幅度算异常？', size=19, fill='#1A365D', weight='bold'))
+lines.append(txt(col_x[1] + 16, y + 106, '不用固定百分比，与历史波动范围对比', size=17, fill='#444'))
+lines.append(txt(col_x[1] + 16, y + 128, '历史波动 ±10% → -8% 不算异常', size=17, fill='#666'))
+lines.append(txt(col_x[1] + 16, y + 150, '历史波动 ±3%  → -5% 值得归因', size=17, fill='#276749', weight='bold'))
+
+lines.append(txt(col_x[1] + 16, y + 188, '② 是否有已知业务原因？', size=19, fill='#1A365D', weight='bold'))
+lines.append(txt(col_x[1] + 16, y + 212, '已知：课程大规模到期退潮', size=17, fill='#444'))
+lines.append(txt(col_x[1] + 16, y + 234, '      → 记录原因，不进归因', size=17, fill='#276749'))
+lines.append(txt(col_x[1] + 16, y + 256, '未知：无任何已知业务原因', size=17, fill='#444'))
+lines.append(txt(col_x[1] + 16, y + 278, '      → 进入正式归因流程', size=17, fill='#C53030', weight='bold'))
+
+lines.append(txt(col_x[1] + 16, y + 314,
+                 '⚠️ 以上两点需与业务方提前对齐', size=17, fill='#C05621', weight='bold'))
+lines.append(txt(col_x[1] + 16, y + 340,
+                 '不对齐直接归因 → 结论无法被业务认可', size=17, fill='#555'))
 
 # ── 右列：本次案例 ──
 lines.append(txt(col_x[2], y + 38, '本次案例', size=22, fill='#2B6CB0', weight='bold'))
-lines.append(rect(col_x[2], y + 66, col_w - 12, 180, '#FFF5F5', rx=8, stroke='#FC8181', sw=1.5))
-lines.append(txt(col_x[2] + 16, y + 90,  '指标：全学段 C 端 GMV', size=18, fill='#444'))
-lines.append(txt(col_x[2] + 16, y + 116, '周期：2026-04-13 vs 2026-04-06', size=18, fill='#444'))
-lines.append(txt(col_x[2] + 16, y + 142, '历史 28 天 μ_daily = 668,760 元', size=18, fill='#444'))
-lines.append(txt(col_x[2] + 16, y + 168, 'σ_daily = 41,230 元（剔除2个大促天后）', size=18, fill='#444'))
-lines.append(txt(col_x[2] + 16, y + 194, '当前周日均 = 622,311 元', size=18, fill='#444'))
-lines.append(txt(col_x[2] + 16, y + 220, '|622,311 - 668,760| = 46,449', size=18, fill='#C53030'))
-lines.append(txt(col_x[2] + 16, y + 242, '46,449 > 2σ(82,460)？  否', size=17, fill='#888'))
-lines.append(txt(col_x[2] + 16, y + 258, '→ 轻度异常，触发 Q2 核查', size=18, fill='#C05621', weight='bold'))
+lines.append(rect(col_x[2], y + 56, col_w - 12, 240, '#FFF5F5', rx=8, stroke='#FC8181', sw=1.5))
+lines.append(txt(col_x[2] + 16, y + 80,  '指标：全学段 C 端 GMV', size=18, fill='#444'))
+lines.append(txt(col_x[2] + 16, y + 106, '周期：2026-04-13 vs 2026-04-06', size=18, fill='#444'))
+lines.append(txt(col_x[2] + 16, y + 132, '基准：近四周同星期均值', size=18, fill='#1E40AF', weight='bold'))
+lines.append(txt(col_x[2] + 16, y + 158, '近四周同星期均值：4,681,322 元', size=18, fill='#444'))
+lines.append(txt(col_x[2] + 16, y + 184, '当前周：4,456,178 元（-4.8%）', size=18, fill='#444'))
+lines.append(txt(col_x[2] + 16, y + 210, '历史正常波动范围：±3%', size=18, fill='#444'))
+lines.append(txt(col_x[2] + 16, y + 236, '-4.8% 超出历史波动范围 ✓', size=18, fill='#C53030', weight='bold'))
+lines.append(txt(col_x[2] + 16, y + 262, '业务方确认：无已知大促/活动', size=18, fill='#444'))
+lines.append(txt(col_x[2] + 16, y + 282, '→ 触发归因流程', size=18, fill='#C05621', weight='bold'))
 
-for i, t in enumerate([
-    '· 付费用户：5,342 → 4,891（↓8.4%）',
-    '  |4,891 - μ_user| > 2σ → 严重异常',
-    '→ 付费用户为核心归因指标',
-]):
-    lines.append(txt(col_x[2] + 16, y + 296 + i * 30, t, size=18,
-                     fill='#C53030' if '严重' in t else '#555'))
+lines.append(txt(col_x[2] + 16, y + 322, '付费用户：5,342 → 4,891（↓8.4%）', size=18, fill='#C53030'))
+lines.append(txt(col_x[2] + 16, y + 348, '同样超出历史波动，以付费用户', size=18, fill='#C53030'))
+lines.append(txt(col_x[2] + 16, y + 370, '为核心归因指标', size=18, fill='#C53030', weight='bold'))
 
 ay = y + BH1
 lines.append(arrow(CX, ay, CX, ay + 44))
@@ -222,131 +231,116 @@ lines.append(arrow(CX, ay, CX, ay + 44))
 
 
 # ══════════════════════════════════
-# Q3 定位下钻（4维并行 → 交叉 → 专项）
+# Q3 定位下钻（全量/局部判断 → 多维对比 → 专项）
 # ══════════════════════════════════
 y = ay + 46
 lines.append(rect(PAD + 80, y, W - PAD * 2 - 160, 72, '#744210', rx=12))
-lines.append(txt(CX, y + 32, 'Q3  定位下钻 · 并行 → 交叉 → 专项',
+lines.append(txt(CX, y + 32, 'Q3  定位下钻 · 全量/局部判断 → 多维对比 → 专项深挖',
                  size=30, fill='white', anchor='middle', weight='bold'))
-lines.append(txt(CX, y + 60, '第一层 4 维并行下钻，第二层交叉验证，第三层根据结果决定专项方向',
+lines.append(txt(CX, y + 60, '先判断问题性质（全量 vs 局部），再决定分析方向，不盲目下钻',
                  size=20, fill='#FBD38D', anchor='middle'))
 
-# ─── 第一层：4 维并行 ───
+# ─── 第一步：全量 vs 局部判断 ───
 y += 88
 lines.append(rect(PAD, y, W - PAD * 2, 50, '#FFFBEB', stroke='#F6AD55', sw=1.5, rx=8))
-lines.append(txt(PAD + 24, y + 18, '第一层  4 维并行下钻（同时运行，互不依赖）',
+lines.append(txt(PAD + 24, y + 18, '第一步  全量 vs 局部判断（Q3 最重要的一步，决定后续所有方向）',
                  size=22, fill='#744210', weight='bold'))
 lines.append(txt(PAD + 24, y + 42,
-                 'GMV 总Δ = Σ(学段贡献) = Σ(渠道贡献) = Σ(平台贡献) = Σ(用户身份贡献)  →  4路各自独立找 TOP 跌点',
+                 '拉"各维度变化率热力表"，快速扫描是否存在维度分化  |  差距 <5% 全量问题；差距 >10% 且有逆势维度 → 局部问题',
                  size=18, fill='#555'))
 
 y += 60
-CARD_H = 290
-gap4 = 20
-card_w = (W - PAD * 2 - gap4 * 3) // 4
+JUDGE_H = 200
+half_j = (W - PAD * 2 - 32) // 2
 
-CARDS = [
-    ('#805AD5', '#EDE9FE', '#553C9A', '维度 A：学段',
-     'stage_name',
-     ['小学 / 初中 / 高中', 'GROUP BY stage_name', '贡献度 = ΔGMV_学段 / ΔTotal'],
-     [('初中', '-172,752', '-7.1%', '77%', '#C53030'),
-      ('小学', ' -42,224', '-2.5%', '19%', '#D69E2E'),
-      ('高中', ' -10,168', '-1.8%',  '4%', '#888')]),
-    ('#2B6CB0', '#EBF8FF', '#1E40AF', '维度 B：渠道',
-     'business_gmv_attribution',
-     ['订单表 + crm 表分别查', 'crm 表需 P99 过滤', '贡献度 = ΔGMV_渠道 / ΔTotal'],
-     [('商业化',   '-108,459', '-14.3%', '47%', '#C53030'),
-      ('商业化电商', '-31,424', '-33.4%', '14%', '#C53030'),
-      ('电销',      '+91,252',  '+3.7%', '-40%', '#276749')]),
-    ('#0D9488', '#E6FFFA', '#065F46', '维度 C：平台',
-     'client_os',
-     ['iOS / Android / PC / 其他', 'GROUP BY client_os', '快速定位单平台故障/发版异常'],
-     [('iOS',     '-98,320', '-6.2%', '44%', '#C53030'),
-      ('Android', '-81,210', '-5.1%', '36%', '#D69E2E'),
-      ('PC/其他',  '-45,614', '-8.9%', '20%', '#D69E2E')]),
-    ('#B7791F', '#FFFBEB', '#7B341E', '维度 D：用户身份',
-     'real_identity',
-     ['新用户 / 老用户 / 付费层级', 'business_user_pay_status_business', '判断用户结构是否在变化'],
-     [('未付费老用户', '-134,560', '-9.2%', '60%', '#C53030'),
-      ('付费用户续费',  '-62,430', '-4.1%', '28%', '#D69E2E'),
-      ('新用户首购',    '-28,154', '-7.8%', '12%', '#D69E2E')]),
-]
+# 全量问题框
+lines.append(rect(PAD, y, half_j, JUDGE_H, '#FFFBEB', stroke='#F6AD55', sw=2, rx=8))
+lines.append(rect(PAD, y, half_j, 40, '#B7791F', rx=8))
+lines.append(txt(PAD + half_j // 2, y + 26, '全量问题（所有维度同向下跌）',
+                 size=20, fill='white', anchor='middle', weight='bold'))
+for i, t in enumerate([
+    '大概率系统性原因：',
+    '  · 季节性退潮 / 大促后回落',
+    '  · 外部环境变化',
+    '',
+    '分析方向：',
+    '  · 重点看时段分布和同比',
+    '  · 不急于下钻具体维度',
+]):
+    lines.append(txt(PAD + 24, y + 58 + i * 24, t, size=17,
+                     fill='#744210' if '分析方向' in t or '大概率' in t else '#555',
+                     weight='bold' if '分析方向' in t or '大概率' in t else 'normal'))
 
-card_tops = []
-for ci, (hc, bc, tc, title, field, descs, rows) in enumerate(CARDS):
-    cx = PAD + ci * (card_w + gap4)
-    card_tops.append(cx + card_w // 2)
-    lines.append(rect(cx, y, card_w, CARD_H, bc, stroke=hc, sw=2.5, rx=8))
-    lines.append(rect(cx, y, card_w, 40, hc, rx=8))
-    lines.append(txt(cx + card_w // 2, y + 26, title,
-                     size=20, fill='white', anchor='middle', weight='bold'))
-    lines.append(txt(cx + 14, y + 56, f'字段: {field}', size=16, fill=tc, weight='bold'))
-    for i, d in enumerate(descs):
-        lines.append(txt(cx + 14, y + 80 + i * 24, d, size=15, fill='#444'))
+# 局部问题框
+rx_j = PAD + half_j + 32
+lines.append(rect(rx_j, y, half_j, JUDGE_H, '#FFF5F5', stroke='#FC8181', sw=2, rx=8))
+lines.append(rect(rx_j, y, half_j, 40, '#C53030', rx=8))
+lines.append(txt(rx_j + half_j // 2, y + 26, '局部问题（部分维度分化，有逆势维度）',
+                 size=20, fill='white', anchor='middle', weight='bold'))
+for i, t in enumerate([
+    '有结构性问题，进入多维对比',
+    '',
+    '本案判断：',
+    '  电销 +3.7% vs 商业化 -14.3%',
+    '  初中 -7.1% vs 高中 -1.8%',
+    '',
+    '→ 局部问题，进入第二步',
+]):
+    lines.append(txt(rx_j + 24, y + 58 + i * 24, t, size=17,
+                     fill='#C53030' if '→' in t or '本案' in t else '#555',
+                     weight='bold' if '→' in t or '本案' in t else 'normal'))
 
-    # mini 表格
-    th_y = y + 158
-    lines.append(rect(cx + 8, th_y, card_w - 16, 26, hc, rx=4))
-    mini_cols = [cx + 14, cx + card_w - 240, cx + card_w - 160, cx + card_w - 60]
-    for mx, ml in zip(mini_cols, ['分组', 'ΔGMV', '变化率', '贡献度']):
-        lines.append(txt(mx, th_y + 18, ml, size=14, fill='white', weight='bold'))
-    for ri, (name, delta, pct, contrib, col) in enumerate(rows):
-        ry = th_y + 26 + ri * 28
-        if ri % 2 == 0:
-            lines.append(rect(cx + 8, ry, card_w - 16, 28, 'white', rx=0))
-        for mx, val in zip(mini_cols, [name, delta, pct, contrib]):
-            lines.append(txt(mx, ry + 19, val, size=14, fill=col,
-                             weight='bold' if mx != mini_cols[0] else 'normal'))
+merge_j = y + JUDGE_H + 16
+lines.append(seg(rx_j + half_j // 2, y + JUDGE_H, rx_j + half_j // 2, merge_j))
+lines.append(arrow(rx_j + half_j // 2, merge_j, rx_j + half_j // 2, merge_j + 36))
 
-# 合并线 → 第二层
-merge1_y = y + CARD_H + 16
-for ct in card_tops:
-    lines.append(seg(ct, y + CARD_H, ct, merge1_y))
-lines.append(seg(card_tops[0], merge1_y, card_tops[-1], merge1_y))
-lines.append(arrow(CX, merge1_y, CX, merge1_y + 36))
-
-# ─── 第二层：交叉矩阵 ───
-y = merge1_y + 38
+# ─── 第二步：多维对比（局部问题专用）───
+y = merge_j + 38
 lines.append(rect(PAD, y, W - PAD * 2, 50, '#744210', stroke='#F6AD55', sw=0, rx=8))
-lines.append(txt(PAD + 24, y + 20, '第二层  交叉矩阵（学段 × 渠道）', size=22, fill='white', weight='bold'))
+lines.append(txt(PAD + 24, y + 20, '第二步  多维对比（局部问题专用）', size=22, fill='white', weight='bold'))
 lines.append(txt(PAD + 24, y + 44,
-                 '定位到"哪个学段 × 哪个渠道"才是真实跌点  |  平台/用户身份维度若有异常信号，也做交叉补充',
+                 '用"对比定性"代替"贡献度排名"：某维度跌但其他正常 → 该维度有个性问题',
                  size=18, fill='#FBD38D'))
 
 y += 60
 CROSS_H = 340
 lines.append(rect(PAD, y, W - PAD * 2, CROSS_H, 'white', stroke='#F6AD55', sw=2))
 
+# 对比维度 A：年级 × 渠道
 th_c = y + 14
 lines.append(rect(PAD + 12, th_c, W - PAD * 2 - 24, 34, '#FFFBEB'))
 cx_cols = [PAD + 28, PAD + 200, PAD + 600, PAD + 920, PAD + 1180, PAD + 1400, PAD + 1620]
-for cx_, lb in zip(cx_cols, ['学段', '渠道', 'Baseline GMV', 'Current GMV', 'ΔGMV', '变化率', '贡献度']):
-    lines.append(txt(cx_, th_c + 23, lb, size=18, fill='#744210', weight='bold'))
+lines.append(txt(PAD + 28, th_c + 10, '对比维度 A：年级 × 渠道', size=16, fill='#744210', weight='bold'))
+for cx_, lb in zip(cx_cols, ['学段', '渠道', 'Baseline GMV', 'Current GMV', 'ΔGMV', '变化率', '对比结论']):
+    lines.append(txt(cx_, th_c + 28, lb, size=17, fill='#744210', weight='bold'))
 
 cross_rows = [
-    ('初中', '商业化',     '557,682', '474,430', '-83,252', '-14.9% 🔴', '37%', '#C53030'),
-    ('初中', '商业化电商',  '93,959',  '62,535', '-31,424', '-33.4% 🔴', '14%', '#C53030'),
-    ('小学', '商业化',    '199,999', '174,793', '-25,206', '-12.6% 🔴', '11%', '#C53030'),
-    ('初中', '入校',      '153,441', '139,120', '-14,321',  '-9.3% 🟡',  '6%', '#D69E2E'),
-    ('小学', '入校',       '56,999',  '52,430',  '-4,569',  '-8.0% 🟡',  '2%', '#D69E2E'),
-    ('初中', '电销',        '电销表',   '电销表', '+91,252',  '+3.7% 🟢', '-40%', '#276749'),
+    ('初中', '商业化',     '557,682', '474,430', '-83,252', '-14.9% 🔴', '局部:商业化个性问题', '#C53030'),
+    ('初中', '商业化电商',  '93,959',  '62,535', '-31,424', '-33.4% 🔴', '局部:最严重跌点', '#C53030'),
+    ('小学', '商业化',    '199,999', '174,793', '-25,206', '-12.6% 🔴', '局部:商业化普遍', '#C53030'),
+    ('初中', '入校',      '153,441', '139,120', '-14,321',  '-9.3% 🟡', '轻度下跌', '#D69E2E'),
+    ('小学', '入校',       '56,999',  '52,430',  '-4,569',  '-8.0% 🟡', '轻度下跌', '#D69E2E'),
+    ('初中', '电销',        '电销表',   '电销表', '+91,252',  '+3.7% 🟢', '逆势上涨(亮点)', '#276749'),
 ]
-for ri, (st, ch, b, c, d, p, ctr, col) in enumerate(cross_rows):
-    ry = th_c + 34 + ri * 34
+for ri, (st, ch, b, c, d, p, concl_txt, col) in enumerate(cross_rows):
+    ry = th_c + 38 + ri * 30
     if ri % 2 == 0:
-        lines.append(rect(PAD + 12, ry, W - PAD * 2 - 24, 34, '#FAFAFA'))
-    for cx_, val in zip(cx_cols, [st, ch, b, c, d, p, ctr]):
-        lines.append(txt(cx_, ry + 23, val, size=17, fill=col,
+        lines.append(rect(PAD + 12, ry, W - PAD * 2 - 24, 30, '#FAFAFA'))
+    for cx_, val in zip(cx_cols, [st, ch, b, c, d, p, concl_txt]):
+        lines.append(txt(cx_, ry + 20, val, size=16, fill=col,
                          weight='bold' if cx_ in cx_cols[4:] else 'normal'))
 
-concl_y = th_c + 34 + len(cross_rows) * 34 + 8
-lines.append(rect(PAD + 12, concl_y, W - PAD * 2 - 24, 54, '#FFFBEB', rx=6, stroke='#F6AD55', sw=1))
-lines.append(txt(PAD + 28, concl_y + 20,
-                 '交叉结论：初中×商业化（37%）+ 初中×商业化电商（14%）是核心跌点；电销初中逆势+3.7%（亮点）',
-                 size=19, fill='#744210', weight='bold'))
-lines.append(txt(PAD + 28, concl_y + 44,
-                 '→ 平台维度：iOS 跌幅最大，建议补充 iOS 漏斗数据；用户身份：未付费老用户流失占 60%',
-                 size=18, fill='#C05621'))
+# 对比维度 B/C/D 汇总
+dim_y = th_c + 38 + len(cross_rows) * 30 + 8
+lines.append(rect(PAD + 12, dim_y, W - PAD * 2 - 24, 84, '#FFFBEB', rx=6, stroke='#F6AD55', sw=1))
+dim_items = [
+    ('对比维度 B：用户分层', '未付费老用户 -9.2%（占跌幅60%）/ 新用户 -7.8% → 判断：老用户流失+获客双弱', '#744210'),
+    ('对比维度 C：公私域',   '私域推送渠道 → 待补充（建议核查私域触达率变化）',                          '#0369A1'),
+    ('对比维度 D：渠道间',   '电销 +3.7% vs 商业化 -14.3% → 商业化个性问题，非产品/外部问题',           '#276749'),
+]
+for i, (dim_title, dim_desc, dim_col) in enumerate(dim_items):
+    lines.append(txt(PAD + 28, dim_y + 18 + i * 26, dim_title, size=16, fill=dim_col, weight='bold'))
+    lines.append(txt(PAD + 280, dim_y + 18 + i * 26, dim_desc, size=16, fill='#444'))
 
 fork3_y = y + CROSS_H + 14
 lines.append(seg(CX, fork3_y, CX, fork3_y + 20))
@@ -357,10 +351,10 @@ lines.append(seg(CX, fork3_y + 20, fork3_R, fork3_y + 20))
 lines.append(arrow(fork3_L, fork3_y + 20, fork3_L, fork3_y + 44))
 lines.append(arrow(fork3_R, fork3_y + 20, fork3_R, fork3_y + 44))
 
-# ─── 第三层：专项深挖 ───
+# ─── 第三步：专项深挖（锁定跌点后才进入）───
 y = fork3_y + 46
 lines.append(rect(PAD, y, W - PAD * 2, 50, '#2D3748', rx=8))
-lines.append(txt(PAD + 24, y + 18, '第三层  专项深挖（根据交叉结果决定方向，只钻显著维度）',
+lines.append(txt(PAD + 24, y + 18, '第三步  专项深挖（锁定具体跌点后，只钻显著维度）',
                  size=22, fill='white', weight='bold'))
 lines.append(txt(PAD + 24, y + 42,
                  '电销 GMV 来自 crm_order_info（P99 过滤），APP/电商来自 topic_order_detail',
@@ -437,7 +431,7 @@ lines.append(txt(rx3 + half_w // 2, y + 28, '📡  专项 B：渠道分支深挖
 # APP 漏斗
 app_y = y + 58
 lines.append(rect(rx3 + 14, app_y, half_w - 28, 32, '#DBEAFE', rx=6))
-lines.append(txt(rx3 + 28, app_y + 21, '▶ APP 渠道（含平台维度补充）：四层漏斗',
+lines.append(txt(rx3 + 28, app_y + 21, '▶ 专项 B-1：APP 渠道 → 四层漏斗',
                  size=19, fill='#1E40AF', weight='bold'))
 for i, (label, sql_hint, action) in enumerate([
     ('① 曝光量', 'event=show，统计 UV', '骤降 → 流量入口/商品下架'),
@@ -459,7 +453,7 @@ lines.append(rect(rx3 + 14, plat_y, half_w - 28, 44, '#EBF8FF', rx=6))
 lines.append(txt(rx3 + 28, plat_y + 18, '补充：iOS vs Android 分平台对比漏斗',
                  size=17, fill='#1E40AF', weight='bold'))
 lines.append(txt(rx3 + 28, plat_y + 38,
-                 '本案 iOS 贡献跌幅 44%，需核查 iOS 版本发布时间',
+                 '逐平台对比，定位是否单平台异常（发版/兼容性）',
                  size=16, fill='#C05621'))
 
 lines.append(seg(rx3 + 14, plat_y + 52, rx3 + half_w - 14, plat_y + 52, '#BEE3F8', sw=1.5))
@@ -467,7 +461,7 @@ lines.append(seg(rx3 + 14, plat_y + 52, rx3 + half_w - 14, plat_y + 52, '#BEE3F8
 # 电销渠道
 crm_y = plat_y + 64
 lines.append(rect(rx3 + 14, crm_y, half_w - 28, 32, '#DBEAFE', rx=6))
-lines.append(txt(rx3 + 28, crm_y + 21, '▶ 电销渠道：团队 × 学段三步归因',
+lines.append(txt(rx3 + 28, crm_y + 21, '▶ 专项 B-2：电销渠道 → 团队三步归因',
                  size=19, fill='#1E40AF', weight='bold'))
 
 CRM_STEP_H = 72
