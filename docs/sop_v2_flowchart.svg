@@ -92,7 +92,7 @@
 <text x="1236" y="1196" text-anchor="start" fill="#444" font-size="17" font-weight="normal">source_type 分布校验：线索来源结构是否突变</text>
 <text x="1236" y="1228" text-anchor="start" fill="#444" font-size="17" font-weight="normal">（结构突变可能是录入问题，不是真实业务变化）</text>
 <rect x="60" y="1284" width="2280" height="44" rx="10" fill="#F0FFF4" stroke="#9AE6B4" stroke-width="1.5"/>
-<text x="1200" y="1312" text-anchor="middle" fill="#276749" font-size="21" font-weight="bold">Q2 结论：数据真实，GMV 环比 -4.8%（轻度异常），付费用户 -8.4%（严重异常），进入 Q3 下钻 ✅</text>
+<text x="1200" y="1312" text-anchor="middle" fill="#276749" font-size="21" font-weight="bold">Q2 结论：数据真实，GMV -4.8% 超出业务方确认的正常范围 [-4%, +4%]，付费用户 -8.4%，进入 Q3 下钻 ✅</text>
 <line x1="1200" y1="1328" x2="1200" y2="1372" stroke="#666" stroke-width="2.5" marker-end="url(#arrow)"/>
 <rect x="140" y="1374" width="2120" height="72" rx="12" fill="#744210"/>
 <text x="1200" y="1406" text-anchor="middle" fill="white" font-size="30" font-weight="bold">Q3  定位下钻 · 全量/局部判断 → 多维对比 → 专项深挖</text>
@@ -318,7 +318,7 @@
 <rect x="140" y="3104" width="2120" height="72" rx="12" fill="#702459"/>
 <text x="1200" y="3136" text-anchor="middle" fill="white" font-size="30" font-weight="bold">Q4  假设验证 · Hypothesis Testing</text>
 <text x="1200" y="3164" text-anchor="middle" fill="#FED7E2" font-size="20" font-weight="normal">⚡ 只验证 Q3 显著维度，不全跑六假设；已排除项直接标注</text>
-<rect x="60" y="3192" width="2280" height="390" rx="10" fill="white" stroke="#FED7E2" stroke-width="2"/>
+<rect x="60" y="3192" width="2280" height="450" rx="10" fill="white" stroke="#FED7E2" stroke-width="2"/>
 <rect x="72" y="3206" width="2256" height="40" rx="10" fill="#FFF5F7"/>
 <text x="90" y="3233" text-anchor="start" fill="#702459" font-size="21" font-weight="bold">假设维度</text>
 <text x="360" y="3233" text-anchor="start" fill="#702459" font-size="21" font-weight="bold">验证逻辑 &amp; SQL 口径</text>
@@ -328,7 +328,7 @@
 <rect x="72" y="3246" width="2256" height="50" rx="10" fill="#FAFAFA"/>
 <text x="90" y="3276" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H1 用户规模萎缩（Q3-D确认）</text>
 <text x="360" y="3276" text-anchor="start" fill="#555" font-size="17" font-weight="normal">COUNT(DISTINCT u_user)，topic_order_detail</text>
-<text x="960" y="3276" text-anchor="start" fill="#C53030" font-size="17" font-weight="normal">付费用户 5,342→4,891（↓8.4%），统计判定：严重异常（>3σ）</text>
+<text x="960" y="3276" text-anchor="start" fill="#C53030" font-size="17" font-weight="normal">付费用户 5,342→4,891（↓8.4%），超出历史波动范围，显著</text>
 <text x="1540" y="3276" text-anchor="start" fill="#C53030" font-size="19" font-weight="bold">~55%</text>
 <text x="1760" y="3276" text-anchor="start" fill="#C53030" font-size="19" font-weight="bold">🔴 核心主因</text>
 <text x="90" y="3326" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H2 商品结构（Q3-A确认）</text>
@@ -337,98 +337,98 @@
 <text x="1540" y="3326" text-anchor="start" fill="#C53030" font-size="19" font-weight="bold">~40%</text>
 <text x="1760" y="3326" text-anchor="start" fill="#C53030" font-size="19" font-weight="bold">🔴 核心主因</text>
 <rect x="72" y="3346" width="2256" height="50" rx="10" fill="#FAFAFA"/>
-<text x="90" y="3376" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H3 渠道效率（Q3-B/C确认）</text>
-<text x="360" y="3376" text-anchor="start" fill="#555" font-size="17" font-weight="normal">business_gmv_attribution，商业化/电销对比</text>
-<text x="960" y="3376" text-anchor="start" fill="#C53030" font-size="17" font-weight="normal">商业化-14.3%，电商-33.4%；电销+3.7%逆势</text>
+<text x="90" y="3376" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H3 渠道效率（Q3-B确认，订单表）</text>
+<text x="360" y="3376" text-anchor="start" fill="#555" font-size="17" font-weight="normal">business_gmv_attribution，商业化 vs 电销对比</text>
+<text x="960" y="3376" text-anchor="start" fill="#C53030" font-size="17" font-weight="normal">订单表：商业化-14.3%，电商-33.4%（局部跌）</text>
 <text x="1540" y="3376" text-anchor="start" fill="#C53030" font-size="19" font-weight="bold">~60%</text>
 <text x="1760" y="3376" text-anchor="start" fill="#C53030" font-size="19" font-weight="bold">🔴 渠道主因</text>
-<text x="90" y="3426" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H4 价格/AOV 变化</text>
-<text x="360" y="3426" text-anchor="start" fill="#555" font-size="17" font-weight="normal">SUM(sub_amount)/COUNT(DISTINCT u_user)</text>
-<text x="960" y="3426" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">AOV: 1,008→1,006（-0.2%），不影响趋势</text>
-<text x="1540" y="3426" text-anchor="start" fill="#276749" font-size="19" font-weight="bold">~0%</text>
-<text x="1760" y="3426" text-anchor="start" fill="#276749" font-size="19" font-weight="bold">✅ 已排除</text>
+<text x="90" y="3426" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H3 渠道效率（Q3-B补充，crm表）</text>
+<text x="360" y="3426" text-anchor="start" fill="#555" font-size="17" font-weight="normal">⚠️ crm表口径独立，贡献度仅在电销内部可比，不与订单表加总</text>
+<text x="960" y="3426" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">crm表：电销团队整体+2.0%（逆势），印证局部判断</text>
+<text x="1540" y="3426" text-anchor="start" fill="#276749" font-size="19" font-weight="bold">—</text>
+<text x="1760" y="3426" text-anchor="start" fill="#276749" font-size="19" font-weight="bold">✅ 电销正常</text>
 <rect x="72" y="3446" width="2256" height="50" rx="10" fill="#FAFAFA"/>
-<text x="90" y="3476" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H5 外部竞品/政策</text>
-<text x="360" y="3476" text-anchor="start" fill="#555" font-size="17" font-weight="normal">竞品监控（作业帮/猿辅导/学而思）</text>
-<text x="960" y="3476" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">未检测到竞品大促或行业政策变动</text>
+<text x="90" y="3476" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H4 价格/AOV 变化</text>
+<text x="360" y="3476" text-anchor="start" fill="#555" font-size="17" font-weight="normal">SUM(sub_amount)/COUNT(DISTINCT u_user)</text>
+<text x="960" y="3476" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">AOV: 1,008→1,006（-0.2%），不影响趋势</text>
 <text x="1540" y="3476" text-anchor="start" fill="#276749" font-size="19" font-weight="bold">~0%</text>
 <text x="1760" y="3476" text-anchor="start" fill="#276749" font-size="19" font-weight="bold">✅ 已排除</text>
-<text x="90" y="3526" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H6 APP 平台/技术（Q3-C补充）</text>
-<text x="360" y="3526" text-anchor="start" fill="#555" font-size="17" font-weight="normal">client_os 漏斗，iOS 贡献跌幅 44%</text>
-<text x="960" y="3526" text-anchor="start" fill="#D69E2E" font-size="17" font-weight="normal">iOS 漏斗数据待补充，需核查发版时间</text>
-<text x="1540" y="3526" text-anchor="start" fill="#D69E2E" font-size="19" font-weight="bold">待核</text>
-<text x="1760" y="3526" text-anchor="start" fill="#D69E2E" font-size="19" font-weight="bold">🟡 待确认</text>
-<rect x="72" y="3540" width="2256" height="32" rx="10" fill="#FFF5F7"/>
-<text x="1200" y="3562" text-anchor="middle" fill="#702459" font-size="18" font-weight="bold">SQL 规范：product_id='01' | is_test_user=0 | sub_amount≥39 | mid_grade | 订单表 paid_time | 电销表 pay_time | 电销 P99 过滤</text>
-<line x1="1200" y1="3582" x2="1200" y2="3626" stroke="#666" stroke-width="2.5" marker-end="url(#arrow)"/>
-<rect x="180" y="3628" width="2040" height="72" rx="12" fill="#C05621"/>
-<text x="1200" y="3660" text-anchor="middle" fill="white" font-size="30" font-weight="bold">Q5  主因判定 · Root Cause Quantification</text>
-<text x="1200" y="3688" text-anchor="middle" fill="#FBD38D" font-size="20" font-weight="normal">GMV = 付费用户数 × AOV  →  拆解各因子实际贡献</text>
-<rect x="60" y="3716" width="2280" height="230" rx="10" fill="white" stroke="#FBD38D" stroke-width="2"/>
-<rect x="72" y="3732" width="732" height="198" rx="8" fill="#FFFBEB"/>
-<text x="444" y="3768" text-anchor="middle" fill="#C05621" font-size="22" font-weight="bold">因子① 付费用户数</text>
-<text x="444" y="3812" text-anchor="middle" fill="#C05621" font-size="22" font-weight="bold">5,342 → 4,891（-8.4%）</text>
-<text x="444" y="3854" text-anchor="middle" fill="#666" font-size="17" font-weight="normal">ΔGMV用户贡献 = ΔUser × BaseAOV</text>
-<text x="444" y="3888" text-anchor="middle" fill="#C05621" font-size="19" font-weight="bold">贡献度约 176%  🔴 核心驱动</text>
-<rect x="840" y="3732" width="732" height="198" rx="8" fill="#F0FFF4"/>
-<text x="1212" y="3768" text-anchor="middle" fill="#276749" font-size="22" font-weight="bold">因子② AOV（客单价）</text>
-<text x="1212" y="3812" text-anchor="middle" fill="#276749" font-size="22" font-weight="bold">877 → 910（+3.8%）</text>
-<text x="1212" y="3854" text-anchor="middle" fill="#666" font-size="17" font-weight="normal">ΔGMV_AOV = ΔAOV × CurrUser</text>
-<text x="1212" y="3888" text-anchor="middle" fill="#276749" font-size="19" font-weight="bold">AOV 反涨，部分对冲  ✅ 非跌因</text>
-<rect x="1608" y="3732" width="732" height="198" rx="8" fill="#F7FAFC"/>
-<text x="1980" y="3768" text-anchor="middle" fill="#4A5568" font-size="22" font-weight="bold">三因子公式</text>
-<text x="1980" y="3812" text-anchor="middle" fill="#4A5568" font-size="22" font-weight="bold">ΔGMV = User效应 + AOV效应</text>
-<text x="1980" y="3854" text-anchor="middle" fill="#666" font-size="17" font-weight="normal">= (ΔUser×BaseAOV) + (ΔAOV×CurrUser)</text>
-<text x="1980" y="3888" text-anchor="middle" fill="#4A5568" font-size="19" font-weight="bold">🟡 建议补充 iOS 漏斗数据</text>
-<line x1="1200" y1="3946" x2="1200" y2="3990" stroke="#666" stroke-width="2.5" marker-end="url(#arrow)"/>
-<rect x="140" y="3992" width="2120" height="72" rx="12" fill="#1A365D"/>
-<text x="1200" y="4024" text-anchor="middle" fill="white" font-size="30" font-weight="bold">Q6  建议输出 · Action &amp; Narrative Report</text>
-<text x="1200" y="4052" text-anchor="middle" fill="#90CDF4" font-size="20" font-weight="normal">结论先行（金字塔结构）+ 取数给建议（禁止虚指）</text>
-<rect x="60" y="4080" width="2280" height="320" rx="10" fill="white" stroke="#90CDF4" stroke-width="2"/>
-<rect x="76" y="4096" width="1112" height="288" rx="8" fill="#EBF8FF"/>
-<text x="636" y="4130" text-anchor="middle" fill="#1A365D" font-size="22" font-weight="bold">📋 报告结构（金字塔原理）</text>
-<text x="92" y="4168" text-anchor="start" fill="#2C5282" font-size="20" font-weight="bold">① 背景（Background）</text>
-<text x="92" y="4196" text-anchor="start" fill="#555" font-size="18" font-weight="normal">指标 / 周期 / 异动幅度 / σ 判定等级</text>
-<text x="92" y="4224" text-anchor="start" fill="#2C5282" font-size="20" font-weight="bold">② 核心结论（Conclusion）</text>
-<text x="92" y="4252" text-anchor="start" fill="#555" font-size="18" font-weight="normal">主因（贡献度%）+ 次因 + 数据佐证  ← 最先看</text>
-<text x="92" y="4280" text-anchor="start" fill="#2C5282" font-size="20" font-weight="bold">③ 业务建议（Action）</text>
-<text x="92" y="4308" text-anchor="start" fill="#555" font-size="18" font-weight="normal">[数据] + [问题] + [行动]  ← 可直接执行</text>
-<text x="92" y="4336" text-anchor="start" fill="#2C5282" font-size="20" font-weight="bold">④ 分析推导（Steps）</text>
-<text x="92" y="4364" text-anchor="start" fill="#555" font-size="18" font-weight="normal">Q2质检→Q3并行→交叉→专项→Q4验证明细</text>
-<rect x="1212" y="4096" width="1112" height="288" rx="8" fill="#FFF5F7"/>
-<text x="1768" y="4130" text-anchor="middle" fill="#702459" font-size="22" font-weight="bold">⚡ 建议输出规范</text>
-<text x="1232" y="4168" text-anchor="start" fill="#C53030" font-size="20" font-weight="bold">❌ 错误示范</text>
-<text x="1232" y="4196" text-anchor="start" fill="#999" font-size="18" font-weight="normal">"建议关注升学课销售情况..."（虚指，不可执行）</text>
-<text x="1232" y="4240" text-anchor="start" fill="#276749" font-size="20" font-weight="bold">✅ 正确示范</text>
-<text x="1232" y="4270" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">[小升初] GMV ↓24.5%（-3.1万，>2σ 轻度异常），4月初签约高峰结束后自然退潮，</text>
-<text x="1232" y="4294" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">建议4月底启动专题活动提前拉需求。</text>
-<text x="1232" y="4324" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">商业化电商 ↓33.4%（>3σ 严重异常），建议立即核查商品链接状态与投放计划。</text>
-<text x="1232" y="4356" text-anchor="start" fill="#702459" font-size="17" font-weight="bold">→ [数据事实 + σ级别] + [发现问题] + [具体行动]，每条可直接执行</text>
-<line x1="1200" y1="4400" x2="1200" y2="4440" stroke="#666" stroke-width="2.5" marker-end="url(#arrow)"/>
-<rect x="280" y="4442" width="1840" height="64" rx="12" fill="#2D3748"/>
-<text x="1200" y="4470" text-anchor="middle" fill="white" font-size="26" font-weight="bold">📤  最终交付物</text>
-<text x="1200" y="4496" text-anchor="middle" fill="#A0AEC0" font-size="19" font-weight="normal">reports_v2/归因分析报告_[指标]_[周期].md  ｜  CSV 原始数据  ｜  周会 PPT 摘要</text>
-<rect x="60" y="4522" width="2280" height="280" rx="14" fill="#1A202C"/>
-<text x="1200" y="4562" text-anchor="middle" fill="#A0AEC0" font-size="26" font-weight="bold">📐  SQL 口径规范速查（必须遵守）</text>
-<text x="80" y="4600" text-anchor="start" fill="#68D391" font-size="20" font-weight="bold">核心表</text>
-<text x="80" y="4630" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">活跃宽表: topic_user_active_detail_day</text>
-<text x="80" y="4660" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">订单表:   topic_order_detail</text>
-<text x="80" y="4690" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">电销表:   crm_order_info</text>
-<text x="80" y="4720" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">线索表:   clue_info</text>
-<text x="655" y="4600" text-anchor="start" fill="#68D391" font-size="20" font-weight="bold">订单表必筛</text>
-<text x="655" y="4630" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">product_id = '01'（C端）</text>
-<text x="655" y="4660" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">is_test_user = 0  |  sub_amount ≥ 39</text>
-<text x="655" y="4690" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">日期用 paid_time（timestamp）</text>
-<text x="655" y="4720" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">商品: good_name + stage_name  |  年级: mid_grade</text>
-<text x="1230" y="4600" text-anchor="start" fill="#68D391" font-size="20" font-weight="bold">电销表必筛</text>
-<text x="1230" y="4630" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">is_test = false  |  amount ≥ 39</text>
-<text x="1230" y="4660" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">日期字段: pay_time（非 paid_time）</text>
-<text x="1230" y="4690" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">P99 过滤: amount ≤ PERCENTILE(0.99)</text>
-<text x="1230" y="4720" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">渠道: business_gmv_attribution</text>
-<text x="1805" y="4600" text-anchor="start" fill="#68D391" font-size="20" font-weight="bold">禁用字段</text>
-<text x="1805" y="4630" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">❌ grade → ✅ mid_grade</text>
-<text x="1805" y="4660" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">❌ role → ✅ real_identity</text>
-<text x="1805" y="4690" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">❌ day 分区 → ✅ paid_time</text>
-<text x="1805" y="4720" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">❌ product_name → ✅ good_name + stage_name</text>
-<text x="1200" y="4780" text-anchor="middle" fill="#4A5568" font-size="18" font-weight="normal">洋葱学园 BI 团队 · 归因分析 SOP v2.0 · 2026-05-06（统计阈值 + 动态表策略 + 4维并行）</text>
+<text x="90" y="3526" text-anchor="start" fill="#444" font-size="18" font-weight="bold">H5/H6 外部竞品/APP技术</text>
+<text x="360" y="3526" text-anchor="start" fill="#555" font-size="17" font-weight="normal">Q3 无信号，跳过</text>
+<text x="960" y="3526" text-anchor="start" fill="#888" font-size="17" font-weight="normal">竞品无大促；iOS漏斗暂缺，可单独补核</text>
+<text x="1540" y="3526" text-anchor="start" fill="#888" font-size="19" font-weight="bold">—</text>
+<text x="1760" y="3526" text-anchor="start" fill="#888" font-size="19" font-weight="bold">— 跳过</text>
+<rect x="72" y="3600" width="2256" height="32" rx="10" fill="#FFF5F7"/>
+<text x="1200" y="3622" text-anchor="middle" fill="#702459" font-size="18" font-weight="bold">SQL 规范：product_id='01' | is_test_user=0 | sub_amount≥39 | mid_grade | 订单表 paid_time | 电销表 pay_time | 电销 P99 过滤 | crm贡献度独立计算</text>
+<line x1="1200" y1="3642" x2="1200" y2="3686" stroke="#666" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="180" y="3688" width="2040" height="72" rx="12" fill="#C05621"/>
+<text x="1200" y="3720" text-anchor="middle" fill="white" font-size="30" font-weight="bold">Q5  主因判定 · Root Cause Quantification</text>
+<text x="1200" y="3748" text-anchor="middle" fill="#FBD38D" font-size="20" font-weight="normal">GMV = 付费用户数 × AOV  →  拆解各因子实际贡献</text>
+<rect x="60" y="3776" width="2280" height="230" rx="10" fill="white" stroke="#FBD38D" stroke-width="2"/>
+<rect x="72" y="3792" width="732" height="198" rx="8" fill="#FFFBEB"/>
+<text x="444" y="3828" text-anchor="middle" fill="#C05621" font-size="22" font-weight="bold">因子① 付费用户数</text>
+<text x="444" y="3872" text-anchor="middle" fill="#C05621" font-size="22" font-weight="bold">5,342 → 4,891（-8.4%）</text>
+<text x="444" y="3914" text-anchor="middle" fill="#666" font-size="17" font-weight="normal">ΔGMV用户贡献 = ΔUser × BaseAOV</text>
+<text x="444" y="3948" text-anchor="middle" fill="#C05621" font-size="19" font-weight="bold">贡献度约 176%  🔴 核心驱动</text>
+<rect x="840" y="3792" width="732" height="198" rx="8" fill="#F0FFF4"/>
+<text x="1212" y="3828" text-anchor="middle" fill="#276749" font-size="22" font-weight="bold">因子② AOV（客单价）</text>
+<text x="1212" y="3872" text-anchor="middle" fill="#276749" font-size="22" font-weight="bold">877 → 910（+3.8%）</text>
+<text x="1212" y="3914" text-anchor="middle" fill="#666" font-size="17" font-weight="normal">ΔGMV_AOV = ΔAOV × CurrUser</text>
+<text x="1212" y="3948" text-anchor="middle" fill="#276749" font-size="19" font-weight="bold">AOV 反涨，部分对冲  ✅ 非跌因</text>
+<rect x="1608" y="3792" width="732" height="198" rx="8" fill="#F7FAFC"/>
+<text x="1980" y="3828" text-anchor="middle" fill="#4A5568" font-size="22" font-weight="bold">三因子公式</text>
+<text x="1980" y="3872" text-anchor="middle" fill="#4A5568" font-size="22" font-weight="bold">ΔGMV = User效应 + AOV效应</text>
+<text x="1980" y="3914" text-anchor="middle" fill="#666" font-size="17" font-weight="normal">= (ΔUser×BaseAOV) + (ΔAOV×CurrUser)</text>
+<text x="1980" y="3948" text-anchor="middle" fill="#4A5568" font-size="19" font-weight="bold">🟡 建议补充 iOS 漏斗数据</text>
+<line x1="1200" y1="4006" x2="1200" y2="4050" stroke="#666" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="140" y="4052" width="2120" height="72" rx="12" fill="#1A365D"/>
+<text x="1200" y="4084" text-anchor="middle" fill="white" font-size="30" font-weight="bold">Q6  建议输出 · Action &amp; Narrative Report</text>
+<text x="1200" y="4112" text-anchor="middle" fill="#90CDF4" font-size="20" font-weight="normal">结论先行（金字塔结构）+ 取数给建议（禁止虚指）</text>
+<rect x="60" y="4140" width="2280" height="320" rx="10" fill="white" stroke="#90CDF4" stroke-width="2"/>
+<rect x="76" y="4156" width="1112" height="288" rx="8" fill="#EBF8FF"/>
+<text x="636" y="4190" text-anchor="middle" fill="#1A365D" font-size="22" font-weight="bold">📋 报告结构（金字塔原理）</text>
+<text x="92" y="4228" text-anchor="start" fill="#2C5282" font-size="20" font-weight="bold">① 背景（Background）</text>
+<text x="92" y="4256" text-anchor="start" fill="#555" font-size="18" font-weight="normal">指标 / 周期 / 异动幅度 / σ 判定等级</text>
+<text x="92" y="4284" text-anchor="start" fill="#2C5282" font-size="20" font-weight="bold">② 核心结论（Conclusion）</text>
+<text x="92" y="4312" text-anchor="start" fill="#555" font-size="18" font-weight="normal">主因（贡献度%）+ 次因 + 数据佐证  ← 最先看</text>
+<text x="92" y="4340" text-anchor="start" fill="#2C5282" font-size="20" font-weight="bold">③ 业务建议（Action）</text>
+<text x="92" y="4368" text-anchor="start" fill="#555" font-size="18" font-weight="normal">[数据] + [问题] + [行动]  ← 可直接执行</text>
+<text x="92" y="4396" text-anchor="start" fill="#2C5282" font-size="20" font-weight="bold">④ 分析推导（Steps）</text>
+<text x="92" y="4424" text-anchor="start" fill="#555" font-size="18" font-weight="normal">Q2质检→Q3并行→交叉→专项→Q4验证明细</text>
+<rect x="1212" y="4156" width="1112" height="288" rx="8" fill="#FFF5F7"/>
+<text x="1768" y="4190" text-anchor="middle" fill="#702459" font-size="22" font-weight="bold">⚡ 建议输出规范</text>
+<text x="1232" y="4228" text-anchor="start" fill="#C53030" font-size="20" font-weight="bold">❌ 错误示范</text>
+<text x="1232" y="4256" text-anchor="start" fill="#999" font-size="18" font-weight="normal">"建议关注升学课销售情况..."（虚指，不可执行）</text>
+<text x="1232" y="4300" text-anchor="start" fill="#276749" font-size="20" font-weight="bold">✅ 正确示范</text>
+<text x="1232" y="4330" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">[小升初] GMV ↓24.5%（-3.1万，局部问题），4月初签约高峰结束后自然退潮，</text>
+<text x="1232" y="4354" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">建议4月底启动专题活动提前拉需求。</text>
+<text x="1232" y="4384" text-anchor="start" fill="#276749" font-size="17" font-weight="normal">商业化电商 ↓33.4%（局部问题，其余渠道正常），建议立即核查商品链接状态与投放计划。</text>
+<text x="1232" y="4416" text-anchor="start" fill="#702459" font-size="17" font-weight="bold">→ [数据事实 + 全量/局部定性] + [发现问题] + [具体行动]，每条可直接执行</text>
+<line x1="1200" y1="4460" x2="1200" y2="4500" stroke="#666" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="280" y="4502" width="1840" height="64" rx="12" fill="#2D3748"/>
+<text x="1200" y="4530" text-anchor="middle" fill="white" font-size="26" font-weight="bold">📤  最终交付物</text>
+<text x="1200" y="4556" text-anchor="middle" fill="#A0AEC0" font-size="19" font-weight="normal">reports_v2/归因分析报告_[指标]_[周期].md  ｜  CSV 原始数据  ｜  周会 PPT 摘要</text>
+<rect x="60" y="4582" width="2280" height="280" rx="14" fill="#1A202C"/>
+<text x="1200" y="4622" text-anchor="middle" fill="#A0AEC0" font-size="26" font-weight="bold">📐  SQL 口径规范速查（必须遵守）</text>
+<text x="80" y="4660" text-anchor="start" fill="#68D391" font-size="20" font-weight="bold">核心表</text>
+<text x="80" y="4690" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">活跃宽表: topic_user_active_detail_day</text>
+<text x="80" y="4720" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">订单表:   topic_order_detail</text>
+<text x="80" y="4750" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">电销表:   crm_order_info</text>
+<text x="80" y="4780" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">线索表:   clue_info</text>
+<text x="655" y="4660" text-anchor="start" fill="#68D391" font-size="20" font-weight="bold">订单表必筛</text>
+<text x="655" y="4690" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">product_id = '01'（C端）</text>
+<text x="655" y="4720" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">is_test_user = 0  |  sub_amount ≥ 39</text>
+<text x="655" y="4750" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">日期用 paid_time（timestamp）</text>
+<text x="655" y="4780" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">商品: good_name + stage_name  |  年级: mid_grade</text>
+<text x="1230" y="4660" text-anchor="start" fill="#68D391" font-size="20" font-weight="bold">电销表必筛</text>
+<text x="1230" y="4690" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">is_test = false  |  amount ≥ 39</text>
+<text x="1230" y="4720" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">日期字段: pay_time（非 paid_time）</text>
+<text x="1230" y="4750" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">P99 过滤: amount ≤ PERCENTILE(0.99)</text>
+<text x="1230" y="4780" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">渠道: business_gmv_attribution</text>
+<text x="1805" y="4660" text-anchor="start" fill="#68D391" font-size="20" font-weight="bold">禁用字段</text>
+<text x="1805" y="4690" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">❌ grade → ✅ mid_grade</text>
+<text x="1805" y="4720" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">❌ role → ✅ real_identity</text>
+<text x="1805" y="4750" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">❌ day 分区 → ✅ paid_time</text>
+<text x="1805" y="4780" text-anchor="start" fill="#A0AEC0" font-size="16" font-weight="normal">❌ product_name → ✅ good_name + stage_name</text>
+<text x="1200" y="4840" text-anchor="middle" fill="#4A5568" font-size="18" font-weight="normal">洋葱学园 BI 团队 · 归因分析 SOP v2.1 · 2026-05-07（场景化基准 + 全量/局部判断 + 动态阈值 + crm口径隔离）</text>
 </svg>
