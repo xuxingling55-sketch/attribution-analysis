@@ -62,7 +62,7 @@
 <text x="1200" y="746" text-anchor="middle" fill="#9AE6B4" font-size="20" font-weight="normal">按分析指标动态决定查哪张表，涉及哪张才检查哪张</text>
 <rect x="60" y="774" width="2280" height="56" rx="8" fill="#F0FFF4" stroke="#9AE6B4" stroke-width="1.5"/>
 <text x="84" y="794" text-anchor="start" fill="#276749" font-size="21" font-weight="bold">通用质检（所有涉及的表都必须过）</text>
-<text x="84" y="818" text-anchor="start" fill="#444" font-size="18" font-weight="normal">① 分区完整性：当前周每日行数 vs 过去28天日均，偏差 &gt; 50% 且无业务原因 → 标记[数据延迟]，终止归因</text>
+<text x="84" y="818" text-anchor="start" fill="#444" font-size="18" font-weight="normal">① 分区完整性：当前周每日行数 vs 过去28天日均，偏差 &gt; 50% 且无业务原因 → 标记[数据延迟]，说明情况并反问业务是否继续归因</text>
 <rect x="60" y="840" width="2280" height="44" rx="8" fill="#F0FFF4" stroke="#9AE6B4" stroke-width="1.5"/>
 <text x="84" y="856" text-anchor="start" fill="#444" font-size="18" font-weight="normal">② 节奏合理性：两周是否含节假日/大促节点不对等  →  若有，切换同比基线或标注"非可比周"</text>
 <text x="84" y="878" text-anchor="start" fill="#444" font-size="18" font-weight="normal">③ 口径一致性：同一指标两周过滤条件完全一致（product_id / is_test_user / sub_amount 等）</text>

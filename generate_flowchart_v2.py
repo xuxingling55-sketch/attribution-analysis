@@ -164,7 +164,7 @@ y += 88
 lines.append(rect(PAD, y, W - PAD * 2, 56, '#F0FFF4', stroke='#9AE6B4', sw=1.5, rx=8))
 lines.append(txt(PAD + 24, y + 20, '通用质检（所有涉及的表都必须过）', size=21, fill='#276749', weight='bold'))
 lines.append(txt(PAD + 24, y + 44,
-                 '① 分区完整性：当前周每日行数 vs 过去28天日均，偏差 > 50% 且无业务原因 → 标记[数据延迟]，终止归因',
+                 '① 分区完整性：当前周每日行数 vs 过去28天日均，偏差 > 50% 且无业务原因 → 标记[数据延迟]，说明情况并反问业务是否继续归因',
                  size=18, fill='#444'))
 
 y += 66
