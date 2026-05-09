@@ -96,7 +96,7 @@
 <line x1="1200" y1="1328" x2="1200" y2="1372" stroke="#666" stroke-width="2.5" marker-end="url(#arrow)"/>
 <rect x="140" y="1374" width="2120" height="72" rx="12" fill="#744210"/>
 <text x="1200" y="1406" text-anchor="middle" fill="white" font-size="30" font-weight="bold">Q3  定位下钻 · 全量/局部判断 → 多维对比 → 专项深挖</text>
-<text x="1200" y="1434" text-anchor="middle" fill="#FBD38D" font-size="20" font-weight="normal">先判断问题性质（全量 vs 局部），再决定分析方向，不盲目下钻</text>
+<text x="1200" y="1434" text-anchor="middle" fill="#FBD38D" font-size="20" font-weight="normal">扫描四个维度（学段 / 渠道 / 用户类型 / 时段），有逆势维度 → 局部问题；所有维度同向跌 → 全量问题</text>
 <rect x="60" y="1462" width="2280" height="50" rx="8" fill="#FFFBEB" stroke="#F6AD55" stroke-width="1.5"/>
 <text x="84" y="1480" text-anchor="start" fill="#744210" font-size="22" font-weight="bold">第一步  全量 vs 局部判断（Q3 最重要的一步，决定后续所有方向）</text>
 <text x="84" y="1504" text-anchor="start" fill="#555" font-size="18" font-weight="normal">拉"各维度变化率表"，扫描四个维度（学段/渠道/用户类型/时段）  |  有逆势维度 → 局部问题；所有维度同向跌 → 全量问题</text>

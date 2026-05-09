@@ -243,7 +243,7 @@ y = ay + 46
 lines.append(rect(PAD + 80, y, W - PAD * 2 - 160, 72, '#744210', rx=12))
 lines.append(txt(CX, y + 32, 'Q3  定位下钻 · 全量/局部判断 → 多维对比 → 专项深挖',
                  size=30, fill='white', anchor='middle', weight='bold'))
-lines.append(txt(CX, y + 60, '先判断问题性质（全量 vs 局部），再决定分析方向，不盲目下钻',
+lines.append(txt(CX, y + 60, '扫描四个维度（学段 / 渠道 / 用户类型 / 时段），有逆势维度 → 局部问题；所有维度同向跌 → 全量问题',
                  size=20, fill='#FBD38D', anchor='middle'))
 
 # ─── 第一步：全量 vs 局部判断 ───
