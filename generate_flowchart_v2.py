@@ -340,9 +340,8 @@ for ri, (st, ch, b, c, d, p, concl_txt, col) in enumerate(cross_rows):
 dim_y = th_c + 38 + len(cross_rows) * 30 + 8
 lines.append(rect(PAD + 12, dim_y, W - PAD * 2 - 24, 84, '#FFFBEB', rx=6, stroke='#F6AD55', sw=1))
 dim_items = [
-    ('对比维度 A：年级 × 渠道', '初中×商业化（37%）+ 初中×商业化电商（14%）是核心跌点；电销初中逆势+3.7%（亮点）', '#744210'),
+    ('对比维度 A：年级 × 渠道', '按行看学段、按列看渠道；初中×商业化（37%）是核心跌点，电销逆势+3.7%（商业化个性问题）', '#744210'),
     ('对比维度 B：用户分层',   '未付费老用户 -9.2%（占跌幅60%）/ 新用户 -7.8% → 判断：老用户流失+获客双弱', '#744210'),
-    ('对比维度 C：渠道间',   '电销 +3.7% vs 商业化 -14.3% → 商业化个性问题，非产品/外部问题',           '#276749'),
 ]
 for i, (dim_title, dim_desc, dim_col) in enumerate(dim_items):
     lines.append(txt(PAD + 28, dim_y + 18 + i * 26, dim_title, size=16, fill=dim_col, weight='bold'))
