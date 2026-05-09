@@ -181,11 +181,11 @@
 <text x="1460" y="2058" text-anchor="start" fill="#276749" font-size="16" font-weight="bold">+3.7% 🟢</text>
 <text x="1680" y="2058" text-anchor="start" fill="#276749" font-size="16" font-weight="bold">逆势上涨(亮点)</text>
 <rect x="72" y="2076" width="2256" height="84" rx="6" fill="#FFFBEB" stroke="#F6AD55" stroke-width="1"/>
-<text x="88" y="2094" text-anchor="start" fill="#744210" font-size="16" font-weight="bold">对比维度 B：用户分层</text>
-<text x="340" y="2094" text-anchor="start" fill="#444" font-size="16" font-weight="normal">未付费老用户 -9.2%（占跌幅60%）/ 新用户 -7.8% → 判断：老用户流失+获客双弱</text>
-<text x="88" y="2120" text-anchor="start" fill="#0369A1" font-size="16" font-weight="bold">对比维度 C：公私域</text>
-<text x="340" y="2120" text-anchor="start" fill="#444" font-size="16" font-weight="normal">私域推送渠道 → 待补充（建议核查私域触达率变化）</text>
-<text x="88" y="2146" text-anchor="start" fill="#276749" font-size="16" font-weight="bold">对比维度 D：渠道间</text>
+<text x="88" y="2094" text-anchor="start" fill="#744210" font-size="16" font-weight="bold">对比维度 A：年级 × 渠道</text>
+<text x="340" y="2094" text-anchor="start" fill="#444" font-size="16" font-weight="normal">初中×商业化（37%）+ 初中×商业化电商（14%）是核心跌点；电销初中逆势+3.7%（亮点）</text>
+<text x="88" y="2120" text-anchor="start" fill="#744210" font-size="16" font-weight="bold">对比维度 B：用户分层</text>
+<text x="340" y="2120" text-anchor="start" fill="#444" font-size="16" font-weight="normal">未付费老用户 -9.2%（占跌幅60%）/ 新用户 -7.8% → 判断：老用户流失+获客双弱</text>
+<text x="88" y="2146" text-anchor="start" fill="#276749" font-size="16" font-weight="bold">对比维度 C：渠道间</text>
 <text x="340" y="2146" text-anchor="start" fill="#444" font-size="16" font-weight="normal">电销 +3.7% vs 商业化 -14.3% → 商业化个性问题，非产品/外部问题</text>
 <line x1="1200" y1="2190" x2="1200" y2="2210" stroke="#999" stroke-width="2"/>
 <line x1="1200" y1="2210" x2="630" y2="2210" stroke="#999" stroke-width="2"/>
