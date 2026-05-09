@@ -252,7 +252,7 @@ lines.append(rect(PAD, y, W - PAD * 2, 50, '#FFFBEB', stroke='#F6AD55', sw=1.5, 
 lines.append(txt(PAD + 24, y + 18, '第一步  全量 vs 局部判断（Q3 最重要的一步，决定后续所有方向）',
                  size=22, fill='#744210', weight='bold'))
 lines.append(txt(PAD + 24, y + 42,
-                 '拉"各维度变化率热力表"，快速扫描是否存在维度分化  |  差距 <5% 全量问题；差距 >10% 且有逆势维度 → 局部问题',
+                 '拉"各维度变化率表"，扫描四个维度（学段/渠道/用户类型/时段）  |  有逆势维度 → 局部问题；所有维度同向跌 → 全量问题',
                  size=18, fill='#555'))
 
 y += 60
@@ -309,7 +309,7 @@ lines.append(txt(PAD + 24, y + 44,
                  size=18, fill='#FBD38D'))
 
 y += 60
-CROSS_H = 340
+CROSS_H = 420
 lines.append(rect(PAD, y, W - PAD * 2, CROSS_H, 'white', stroke='#F6AD55', sw=2))
 
 # 对比维度 A：年级 × 渠道
@@ -340,12 +340,16 @@ for ri, (st, ch, b, c, d, p, concl_txt, col) in enumerate(cross_rows):
 dim_y = th_c + 38 + len(cross_rows) * 30 + 8
 lines.append(rect(PAD + 12, dim_y, W - PAD * 2 - 24, 84, '#FFFBEB', rx=6, stroke='#F6AD55', sw=1))
 dim_items = [
-    ('对比维度 A：年级 × 渠道', '按行看学段、按列看渠道；初中×商业化（37%）是核心跌点，电销逆势+3.7%（商业化个性问题）', '#744210'),
-    ('对比维度 B：用户分层',   '未付费老用户 -9.2%（占跌幅60%）/ 新用户 -7.8% → 判断：老用户流失+获客双弱', '#744210'),
+    ('#744210', '对比维度 A：年级 × 渠道', '按行看学段、按列看渠道；初中×商业化（37%）是核心跌点，电销逆势+3.7%（商业化个性问题）'),
+    ('#744210', '对比维度 B：用户分层',   '未付费老用户 -9.2%（占跌幅60%）/ 新用户 -7.8% → 老用户流失+获客双弱'),
+    ('#0369A1', '对比维度 C：时间分布（辅助）', '日粒度趋势图，某几天骤跌 → 系统/推送/投放暂停；每天持续跌 → 结构性问题'),
+    ('#888',    '可选：新老用户 × 学段交叉', 'A+B 仍模糊时补跑；初中新用户跌+老用户正常 → 初中获客链路问题，非产品问题'),
 ]
-for i, (dim_title, dim_desc, dim_col) in enumerate(dim_items):
-    lines.append(txt(PAD + 28, dim_y + 18 + i * 26, dim_title, size=16, fill=dim_col, weight='bold'))
-    lines.append(txt(PAD + 280, dim_y + 18 + i * 26, dim_desc, size=16, fill='#444'))
+dim_box_h = 18 + len(dim_items) * 28
+lines.append(rect(PAD + 12, dim_y, W - PAD * 2 - 24, dim_box_h, '#FFFBEB', rx=6, stroke='#F6AD55', sw=1))
+for i, (dim_col, dim_title, dim_desc) in enumerate(dim_items):
+    lines.append(txt(PAD + 28, dim_y + 22 + i * 28, dim_title, size=16, fill=dim_col, weight='bold'))
+    lines.append(txt(PAD + 320, dim_y + 22 + i * 28, dim_desc, size=16, fill='#444'))
 
 fork3_y = y + CROSS_H + 14
 lines.append(seg(CX, fork3_y, CX, fork3_y + 20))
