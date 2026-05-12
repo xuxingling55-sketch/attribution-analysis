@@ -241,13 +241,31 @@ lines.append(arrow(CX, ay, CX, ay + 44))
 # ══════════════════════════════════
 y = ay + 46
 lines.append(rect(PAD + 80, y, W - PAD * 2 - 160, 72, '#744210', rx=12))
-lines.append(txt(CX, y + 32, 'Q3  定位下钻 · 全量/局部判断 → 多维对比 → 专项深挖',
+lines.append(txt(CX, y + 32, 'Q3  定位下钻 · 全站对标 → 全量/局部判断 → 多维对比 → 专项深挖',
                  size=30, fill='white', anchor='middle', weight='bold'))
-lines.append(txt(CX, y + 60, '扫描四个维度（学段 / 渠道 / 用户类型 / 时段），有逆势维度 → 局部问题；所有维度同向跌 → 全量问题',
+lines.append(txt(CX, y + 60, '先对标全站大盘（环境因素优先），再并行四维贡献度排序，最后下钻显著维度',
                  size=20, fill='#FBD38D', anchor='middle'))
 
-# ─── 第一步：全量 vs 局部判断 ───
+# ─── 前置：全站大盘对标 ───
 y += 88
+lines.append(rect(PAD, y, W - PAD * 2, 50, '#FEFCBF', stroke='#D69E2E', sw=1.5, rx=8))
+lines.append(txt(PAD + 24, y + 18, '前置  全站大盘对标（进内部下钻之前，先判断是行业性问题还是本品问题）',
+                 size=22, fill='#744210', weight='bold'))
+lines.append(txt(PAD + 24, y + 42,
+                 '大盘同向跌 → 环境因素优先，内部归因降权  |  大盘正常 → 内部问题，进下钻  |  大盘涨本品跌 → 内部问题+竞争风险，加急归因',
+                 size=18, fill='#555'))
+
+# 四维并行跑说明
+y += 62
+lines.append(rect(PAD, y, W - PAD * 2, 42, '#FFFFF0', stroke='#D69E2E', sw=1, rx=8))
+lines.append(txt(PAD + 24, y + 15, '⚡ 四维并行跑，输出贡献度排序，再决定往哪下钻',
+                 size=19, fill='#744210', weight='bold'))
+lines.append(txt(PAD + 24, y + 35,
+                 '年级（mid_grade）  ×  渠道（business_gmv_attribution）  ×  商品（good_name）  ×  销售团队（crm表）  →  delta_gmv 降序排列',
+                 size=17, fill='#555'))
+
+# ─── 第一步：全量 vs 局部判断 ───
+y += 58
 lines.append(rect(PAD, y, W - PAD * 2, 50, '#FFFBEB', stroke='#F6AD55', sw=1.5, rx=8))
 lines.append(txt(PAD + 24, y + 18, '第一步  全量 vs 局部判断（Q3 最重要的一步，决定后续所有方向）',
                  size=22, fill='#744210', weight='bold'))
@@ -715,7 +733,7 @@ for i, (sec_title, sec_items) in enumerate(sql_secs):
         lines.append(txt(sx, y + 108 + j * 30, item, size=16, fill='#A0AEC0'))
 
 lines.append(txt(CX, y + 258,
-                 '洋葱学园 BI 团队 · 归因分析 SOP v2.1 · 2026-05-07（场景化基准 + 全量/局部判断 + 动态阈值 + crm口径隔离）',
+                 '洋葱学园 BI 团队 · 归因分析 SOP v2.1 · 2026-05-12（场景化基准 + 全站对标 + 动态阈值 + 四维并行 + 数据质检规范）',
                  size=18, fill='#4A5568', anchor='middle'))
 
 total_h = y + 280
